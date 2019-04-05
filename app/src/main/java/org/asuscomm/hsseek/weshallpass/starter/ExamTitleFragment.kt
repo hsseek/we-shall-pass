@@ -5,22 +5,22 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.fragment_exam_title.view.*
 
 import org.asuscomm.hsseek.weshallpass.R
 
-private const val ARG_EXAM_TITLE = "examTitle"
-private const val ARG_SUBJECT_TITLE = "subjectTitle"
+private const val ARG_EXAM_TITLE = "ARG_EXAM_TITLE"
+private const val ARG_SUBJECT_TITLE = "ARG_SUBJECT_TITLE"
 
 class ExamTitleFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var examTitle: String? = null
+    private var subjectTitle: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_EXAM_TITLE)
-            param2 = it.getString(ARG_SUBJECT_TITLE)
+            examTitle = it.getString(ARG_EXAM_TITLE)
+            subjectTitle = it.getString(ARG_SUBJECT_TITLE)
         }
     }
 
@@ -28,21 +28,16 @@ class ExamTitleFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_exam_title, container, false)
-    }
+        val view = inflater.inflate(R.layout.fragment_exam_title, container, false)
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     *
-     *
-     * See the Android Training lesson [Communicating with Other Fragments]
-     * (http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
-     */
+        // Set the titles
+        view.apply {
+            text_title_exam.text = examTitle ?: getString(R.string.starter_examtitle_default)
+            text_title_subject.text = subjectTitle ?: getString(R.string.starter_subjecttitle_default)
+        }
+
+        return view
+    }
 
     companion object {
         @JvmStatic

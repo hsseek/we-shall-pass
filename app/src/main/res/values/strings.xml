@@ -1,7 +1,10 @@
 <resources>
-    <string name="app_name">WeShallPass</string>
+    <string name="app_name">We Shall Pass</string>
     <string name="action_settings">Settings</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="starter_examtitle_default">Test title</string>
+    <string name="starter_subjecttitle_default">Subject name</string>
 </resources>
