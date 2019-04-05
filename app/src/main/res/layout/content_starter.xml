@@ -17,10 +17,10 @@
     <!--<fragment android:name="org.asuscomm.hsseek.weshallpass.starter.ExamSubjectFragment"
         android:id="@+id/fragment_starter_subjects"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"/>-->
     <fragment android:name="org.asuscomm.hsseek.weshallpass.starter.ExamStarterFragment"
         android:id="@+id/fragment_starter_start"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>-->
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

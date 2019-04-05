@@ -30,11 +30,8 @@ class ExamTitleFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_exam_title, container, false)
 
-        // Set the titles
-        view.apply {
-            text_title_exam.text = examTitle ?: getString(R.string.starter_examtitle_default)
-            text_title_subject.text = subjectTitle ?: getString(R.string.starter_subjecttitle_default)
-        }
+        // Set the title
+        view.text_title_exam.text = examTitle ?: getString(R.string.title_exam_na)
 
         return view
     }

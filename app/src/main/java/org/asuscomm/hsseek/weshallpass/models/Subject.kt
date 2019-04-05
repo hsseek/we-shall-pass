@@ -1,3 +1,3 @@
 package org.asuscomm.hsseek.weshallpass.models
 
-class Subject(name: String, duration: Int)
+class Subject(val name: String, val duration: Int)

@@ -1,10 +1,20 @@
 <resources>
-    <string name="app_name">We Shall Pass</string>
+    <string name="app_name">You Shall Pass</string>
     <string name="action_settings">Settings</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <string name="starter_examtitle_default">Test title</string>
-    <string name="starter_subjecttitle_default">Subject name</string>
+    <string name="title_exam_na">No recent test</string>
+    <string name="subject_na">No subject</string>
+    <string name="starter_start">Start</string>
+    <string name="all_timeunit">&#160;minutes</string>
+
+    <string name="db_lg_title">LG 인적성 검사</string>
+    <string name="db_lg_1">언어 이해</string>
+    <string name="db_lg_2">언어 추리</string>
+    <string name="db_lg_3">인문 역량</string>
+    <string name="db_lg_4">수리력</string>
+    <string name="db_lg_5">도형 추리</string>
+    <string name="db_lg_6">도식적 추리</string>
 </resources>

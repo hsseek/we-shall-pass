@@ -12,15 +12,8 @@
         android:id="@+id/text_title_exam"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
-        tools:text="TOEIC"
-        />
-    <TextView
-        android:id="@+id/text_title_subject"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:textSize="30sp"
-        tools:text="Listening Comprehension"
+        tools:text="TOEIC"
         />
 
 </LinearLayout>

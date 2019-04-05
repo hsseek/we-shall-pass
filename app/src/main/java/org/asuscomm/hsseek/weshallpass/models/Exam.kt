@@ -1,7 +1,3 @@
 package org.asuscomm.hsseek.weshallpass.models
 
-import javax.security.auth.Subject
-
-class Exam (name: String, subjects: List<Subject>){
-
-}
+class Exam (val name: String, val subjects: List<Subject>)
