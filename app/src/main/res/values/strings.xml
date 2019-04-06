@@ -5,10 +5,10 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <string name="title_exam_na">No recent test</string>
-    <string name="subject_na">No subject</string>
-    <string name="starter_start">Start</string>
-    <string name="all_timeunit">&#160;minutes</string>
+    <string name="title_exam_na">시험명</string>
+    <string name="subject_na">선택된 과목 없음</string>
+    <string name="starter_start">시작</string>
+    <string name="all_timeunit">분</string>
 
     <string name="db_lg_title">LG 인적성 검사</string>
     <string name="db_lg_1">언어 이해</string>
