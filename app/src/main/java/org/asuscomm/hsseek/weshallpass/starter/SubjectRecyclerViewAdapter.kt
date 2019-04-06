@@ -19,20 +19,9 @@ const val VIEW_TYPE_SUBJECT = 1
 const val VIEW_TYPE_FOOTER = 2
 
 class SubjectRecyclerViewAdapter(
-    private val subjects: MutableList<Subject>,
+    var subjects: MutableList<Subject>,
     private val mListener: OnSubjectInteractionListener?
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    private val mOnClickListener: View.OnClickListener
-
-    init {
-        mOnClickListener = View.OnClickListener { v ->
-            val item = v.tag as Subject
-            // Notify the active callbacks interface (the activity, if the fragment is attached to
-            // one) that an item has been selected.
-            mListener?.onListFragmentInteraction(item)
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view: View
@@ -59,31 +48,27 @@ class SubjectRecyclerViewAdapter(
             }
         } else if (holder is SubjectViewHolder) { /* Normal subject item */
             val subject = subjects[position]
+            holder.subjectInclude.setOnCheckedChangeListener { buttonView, isChecked ->
+
+            }
             holder.subjectTitle.text = subject.title
             holder.subjectDuration.text = subject.duration.toString()
 
-            with(holder.mView) {
-                tag = subject
-                setOnClickListener(mOnClickListener)
-            }
+//            with(holder.mView) {
+//                tag = subject
+//                setOnClickListener(mOnClickListener)
+//            }
         }
     }
 
     override fun getItemCount(): Int = subjects.size + 1
 
-    fun replaceSubject(subjects: List<Subject>) {
-        this.subjects.clear()
-        for (subject in subjects) {
-            this.subjects.add(subject)
-        }
-    }
-
-    inner class SubjectViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
+    inner class SubjectViewHolder(mView: View) : RecyclerView.ViewHolder(mView) {
         val subjectInclude: CheckBox = mView.checkbox_subject_include
         val subjectTitle: TextView = mView.text_subject_title
         val subjectDuration: TextView = mView.edit_subject_duration
         val subjectDelete: ImageView = mView.button_subject_remove
     }
 
-    inner class FooterViewHolder(val mView: View): RecyclerView.ViewHolder(mView)
+    inner class FooterViewHolder(mView: View): RecyclerView.ViewHolder(mView)
 }

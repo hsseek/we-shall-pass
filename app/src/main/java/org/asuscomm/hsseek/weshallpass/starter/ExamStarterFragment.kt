@@ -13,10 +13,6 @@ import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
 class ExamStarterFragment : Fragment() {
     private var examDuration: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

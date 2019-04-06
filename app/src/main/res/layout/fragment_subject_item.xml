@@ -15,6 +15,7 @@
 
     <EditText
         android:id="@+id/text_subject_title"
+        android:inputType="text"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
@@ -26,6 +27,7 @@
 
     <EditText
         android:id="@+id/edit_subject_duration"
+        android:inputType="number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceListItem"

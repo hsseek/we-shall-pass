@@ -11,11 +11,6 @@ import android.view.ViewGroup
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Subject
 
-/**
- * A fragment representing a list of Items.
- * Activities containing this fragment MUST implement the
- * [ExamSubjectsFragment.OnSubjectInteractionListener] interface.
- */
 class ExamSubjectsFragment : Fragment() {
 
     private var listener: OnSubjectInteractionListener? = null
@@ -24,14 +19,10 @@ class ExamSubjectsFragment : Fragment() {
         set(value) {
             field = value
             recyclerViewAdapter?.run {
-                replaceSubject(field)
+                this.subjects = field
                 notifyDataSetChanged()
             }
         }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,7 +47,7 @@ class ExamSubjectsFragment : Fragment() {
         if (context is OnSubjectInteractionListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnSubjectInteractionListener")
+            throw RuntimeException("$context must implement OnSubjectInteractionListener")
         }
     }
 
@@ -66,8 +57,10 @@ class ExamSubjectsFragment : Fragment() {
     }
 
     interface OnSubjectInteractionListener {
-        // TODO: Update argument type and title
-        fun onListFragmentInteraction(item: Subject?)
+        fun onCheckedSubjectChange(position: Int, isChecked: Boolean)
+        fun onChangeSubjectTitle(position: Int, changedTitle: String)
+        fun onChangeSubjectDuration(position: Int, changedDuration: Int)
+        fun onDeleteSubject(position: Int)
     }
 
     companion object {

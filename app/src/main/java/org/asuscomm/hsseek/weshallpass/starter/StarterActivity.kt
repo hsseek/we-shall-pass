@@ -49,7 +49,6 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjects
     }
 
     override fun refreshSubjects(subjects: MutableList<Subject>) {
-        // TODO: Populate the RecyclerView with the List
         subjectsFragment?.subjects = subjects
     }
 
@@ -58,7 +57,19 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjects
         starterFragment?.replaceDuration(durationString)
     }
 
-    override fun onListFragmentInteraction(item: Subject?) {
+    override fun onCheckedSubjectChange(position: Int, isChecked: Boolean) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onChangeSubjectTitle(position: Int, changedTitle: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onChangeSubjectDuration(position: Int, changedDuration: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onDeleteSubject(position: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
