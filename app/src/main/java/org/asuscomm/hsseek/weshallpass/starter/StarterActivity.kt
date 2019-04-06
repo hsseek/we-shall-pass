@@ -39,7 +39,7 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjects
         val newSubjectsFragment = ExamSubjectsFragment.newInstance().also {
             subjectsFragment = it
         }
-        presenter.registerExam(lgExam)
+        presenter.exam = lgExam
 
         // Begin Fragment transaction
         supportFragmentManager.beginTransaction()
