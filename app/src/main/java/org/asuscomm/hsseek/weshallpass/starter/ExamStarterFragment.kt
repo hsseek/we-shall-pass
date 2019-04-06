@@ -24,7 +24,7 @@ class ExamStarterFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_exam_starter, container, false)
 
-        view.fab_starter_start.setOnClickListener {
+        view.button_starter_start.setOnClickListener {
             val intent = Intent(activity, TimerActivity::class.java)
             startActivity(intent)
         }

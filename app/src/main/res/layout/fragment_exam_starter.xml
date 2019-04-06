@@ -16,15 +16,16 @@
         android:textColor="@android:color/black"
         tools:text="120 min" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_starter_start"
+    <ImageButton
+        android:id="@+id/button_starter_start"
         android:layout_width="@dimen/fab_size"
         android:layout_height="@dimen/fab_size"
-        android:layout_gravity="bottom|center"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_play_arrow"
-        app:fabCustomSize="@dimen/fab_size"
-        android:scaleType="center"
+        android:layout_gravity="center_horizontal|bottom"
+        android:tint="@color/colorAccent"
+        android:src="@drawable/ic_play_circle"
+        android:scaleType="fitXY"
+        android:background="@android:color/transparent"
         />
 
 </android.support.design.widget.CoordinatorLayout>
