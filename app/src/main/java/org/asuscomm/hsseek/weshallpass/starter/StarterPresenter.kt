@@ -15,7 +15,6 @@ class StarterPresenter(private val view: View) {
         }
 
         view.apply {
-            refreshExamTitle(exam.name)
             refreshSubjects(exam.subjects)
             refreshTotalDuration(totalDuration)
         }
@@ -23,7 +22,6 @@ class StarterPresenter(private val view: View) {
     }
 
     interface View {
-        fun refreshExamTitle(name: String)
         fun refreshSubjects(subjects: List<Subject>)
         fun refreshTotalDuration(totalDuration: Int)
     }

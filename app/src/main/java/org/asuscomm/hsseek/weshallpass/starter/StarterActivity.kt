@@ -8,7 +8,6 @@ import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_starter.*
 import kotlinx.android.synthetic.main.fragment_exam_starter.*
-import kotlinx.android.synthetic.main.fragment_exam_title.*
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
@@ -16,7 +15,6 @@ import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
 
 class StarterActivity : AppCompatActivity(), StarterPresenter.View {
     private val presenter = StarterPresenter(this)
-    private var examTitleFragment: ExamTitleFragment? = null
     private var subjectFragment: ExamSubjectFragment? = null
     private var startFragment: ExamStarterFragment? = null
 
@@ -44,10 +42,6 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View {
             listOf(lgSubject1, lgSubject2, lgSubject3, lgSubject4, lgSubject5, lgSubject6))
 
         presenter.registerExam(lgExam)
-    }
-
-    override fun refreshExamTitle(name: String) {
-        text_title_exam.text = name
     }
 
     override fun refreshSubjects(subjects: List<Subject>) {
