@@ -10,14 +10,23 @@
         tools:showIn="@layout/activity_starter"
         tools:context=".starter.StarterActivity">
 
-    <!--<fragment android:name="org.asuscomm.hsseek.weshallpass.starter.ExamSubjectFragment"
-        android:id="@+id/fragment_starter_subjects"
+    <FrameLayout
+        android:id="@+id/frame_starter_top"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>-->
+        android:layout_height="wrap_content"
+        />
 
-    <fragment android:name="org.asuscomm.hsseek.weshallpass.starter.ExamStarterFragment"
-        android:id="@+id/fragment_starter_title"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="1dp"
+        android:background="@color/grey"
+        />
+
+    <FrameLayout
+        android:id="@+id/frame_starter_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
 
 </LinearLayout>

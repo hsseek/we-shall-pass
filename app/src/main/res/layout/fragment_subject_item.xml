@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <CheckBox
+        android:id="@+id/checkbox_subject_include"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        />
+
+    <EditText
+        android:id="@+id/text_subject_title"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:hint="@string/subject_hint"
+        android:layout_marginEnd="40dp"
+        tools:text="언어 추리"
+        />
+
+    <EditText
+        android:id="@+id/edit_subject_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceListItem"
+        tools:text="20"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/all_timeunit"
+        android:layout_marginEnd="@dimen/text_margin"
+        />
+
+    <ImageButton
+        android:id="@+id/button_subject_remove"
+        android:tint="@color/grey"
+        android:src="@drawable/ic_remove"
+        android:background="@null"
+        android:layout_width="@dimen/dia_subject_remove"
+        android:layout_height="@dimen/dia_subject_remove"
+        android:scaleType="fitXY"
+        />
+</LinearLayout>

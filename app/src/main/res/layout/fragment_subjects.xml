@@ -9,5 +9,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".starter.ExamSubjectFragment"
-    tools:listitem="@layout/fragment_subject" />
+    tools:context=".starter.ExamSubjectsFragment"
+    tools:listitem="@layout/fragment_subject_item" />

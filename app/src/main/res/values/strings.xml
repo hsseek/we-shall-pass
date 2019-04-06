@@ -7,6 +7,7 @@
 
     <string name="title_exam_na">시험명</string>
     <string name="subject_na">선택된 과목 없음</string>
+    <string name="subject_hint">과목명</string>
     <string name="starter_start">시작</string>
     <string name="all_timeunit">분</string>
 

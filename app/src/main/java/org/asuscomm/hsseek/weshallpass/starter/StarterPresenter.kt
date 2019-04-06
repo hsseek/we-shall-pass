@@ -5,24 +5,25 @@ import org.asuscomm.hsseek.weshallpass.models.Subject
 
 class StarterPresenter(private val view: View) {
     var exam: Exam? = null
+        private set
+
+    var subjects: MutableList<Subject> = mutableListOf()
+        get() {
+            return exam?.subjects ?: mutableListOf()
+        }
+        private set
 
     fun registerExam(exam: Exam) {
         this.exam = exam
-        var totalDuration = 0
 
-        for (subject in exam.subjects) {
-            totalDuration += subject.duration
+        with(view) {
+            refreshSubjects(subjects)
+            refreshTotalDuration(exam.duration)
         }
-
-        view.apply {
-            refreshSubjects(exam.subjects)
-            refreshTotalDuration(totalDuration)
-        }
-
     }
 
     interface View {
-        fun refreshSubjects(subjects: List<Subject>)
+        fun refreshSubjects(subjects: MutableList<Subject>)
         fun refreshTotalDuration(totalDuration: Int)
     }
 }

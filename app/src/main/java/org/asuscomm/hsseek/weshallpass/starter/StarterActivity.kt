@@ -1,34 +1,24 @@
 package org.asuscomm.hsseek.weshallpass.starter
 
-import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_starter.*
-import kotlinx.android.synthetic.main.fragment_exam_starter.*
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
-import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
 
-class StarterActivity : AppCompatActivity(), StarterPresenter.View {
+class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjectsFragment.OnSubjectInteractionListener {
     private val presenter = StarterPresenter(this)
-    private var subjectFragment: ExamSubjectFragment? = null
-    private var startFragment: ExamStarterFragment? = null
+    private var subjectsFragment: ExamSubjectsFragment? = null
+    private var starterFragment: ExamStarterFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Initialize the views
         setContentView(R.layout.activity_starter)
         setSupportActionBar(toolbar)
-
-        // and the FAB
-        fab.setOnClickListener {
-            val intent = Intent(this, TimerActivity::class.java)
-            startActivity(intent)
-        }
 
         // TODO: Convert the example Exam object to an element of the local DB.
         val lgSubject1 = Subject(getString(R.string.db_lg_1), 25)
@@ -39,18 +29,37 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View {
         val lgSubject6 = Subject(getString(R.string.db_lg_6), 20)
 
         val lgExam = Exam(getString(R.string.db_lg_title),
-            listOf(lgSubject1, lgSubject2, lgSubject3, lgSubject4, lgSubject5, lgSubject6))
+            mutableListOf(lgSubject1, lgSubject2, lgSubject3, lgSubject4, lgSubject5, lgSubject6)
+        )
 
+        // Instantiate the Fragments and the Presenter
+        val newStarterFragment = ExamStarterFragment.newInstance().also {
+            starterFragment = it
+        }
+        val newSubjectsFragment = ExamSubjectsFragment.newInstance().also {
+            subjectsFragment = it
+        }
         presenter.registerExam(lgExam)
+
+        // Begin Fragment transaction
+        supportFragmentManager.beginTransaction()
+            .add(R.id.frame_starter_top, newSubjectsFragment)
+            .add(R.id.frame_starter_bottom, newStarterFragment)
+            .commit()
     }
 
-    override fun refreshSubjects(subjects: List<Subject>) {
+    override fun refreshSubjects(subjects: MutableList<Subject>) {
         // TODO: Populate the RecyclerView with the List
+        subjectsFragment?.subjects = subjects
     }
 
     override fun refreshTotalDuration(totalDuration: Int) {
         val durationString = totalDuration.toString() + getString(R.string.all_timeunit)
-        text_starter_totalduration.text = durationString
+        starterFragment?.replaceDuration(durationString)
+    }
+
+    override fun onListFragmentInteraction(item: Subject?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
