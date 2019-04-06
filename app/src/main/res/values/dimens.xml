@@ -6,4 +6,5 @@
     <dimen name="design_fab_image_size" tools:override="true">40dp</dimen>
     
     <dimen name="dia_subject_remove">12dp</dimen>
+    <dimen name="width_subject_add">30dp</dimen>
 </resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frame_subject_add"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="8dp"
+    >
+
+    <ImageButton
+        android:layout_gravity="center"
+        android:background="@drawable/ic_add"
+        android:backgroundTint="@color/grey"
+        android:layout_width="@dimen/width_subject_add"
+        android:layout_height="@dimen/width_subject_add"
+        android:scaleType="fitXY"
+        android:clickable="false"
+        />
+</FrameLayout>
