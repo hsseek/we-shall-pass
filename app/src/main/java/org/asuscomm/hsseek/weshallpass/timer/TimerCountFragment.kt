@@ -11,15 +11,18 @@ import kotlinx.android.synthetic.main.fragment_timer_count.view.*
 import org.asuscomm.hsseek.weshallpass.R
 
 private const val ARG_SUBJECT_DURATION = "ARG_SUBJECT_DURATION"
+private const val ARG_SUBJECT_TITLE = "ARG_SUBJECT_TITLE"
 private const val TAG = "TimerCountFragment"
 
 class TimerCountFragment : Fragment() {
-    private var subjectDurationSeconds: Int = 0
+    private var subjectDurationSeconds = 0
+    private var subjectTitle: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             subjectDurationSeconds = it.getInt(ARG_SUBJECT_DURATION)
+            subjectTitle = it.getString(ARG_SUBJECT_TITLE) ?: getString(R.string.subject_na)
         }
     }
 
@@ -28,7 +31,12 @@ class TimerCountFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_timer_count, container, false)
-        view.text_count_time.text = formatCountdown(subjectDurationSeconds)
+
+        with(view) {
+            text_count_title.text = subjectTitle
+            text_count_time.text = formatCountdown(subjectDurationSeconds)
+        }
+
         return view
     }
 
@@ -50,12 +58,20 @@ class TimerCountFragment : Fragment() {
         return if (int < 10) "0$int" else int.toString()
     }
 
+    fun updateSubject(title: String, durationSeconds: Int) {
+        view?.let {
+            it.text_count_title?.text = title
+            it.text_count_time?.text = formatCountdown(durationSeconds)
+        }
+    }
+
     companion object {
         @JvmStatic
-        fun newInstance(subjectDuration: Int) =
+        fun newInstance(subjectTitle: String, subjectDuration: Int) =
             TimerCountFragment().apply {
                 arguments = Bundle().apply {
                     putInt(ARG_SUBJECT_DURATION, subjectDuration)
+                    putString(ARG_SUBJECT_TITLE, subjectTitle)
                 }
             }
     }

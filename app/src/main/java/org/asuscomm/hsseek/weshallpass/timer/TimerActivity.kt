@@ -17,18 +17,27 @@ class TimerActivity : AppCompatActivity(),
     private var countFragment: TimerCountFragment? = null
     private var controlFragment: TimerControlFragment? = null
 
+    // The valid Subjects
+    private val subjects: ArrayList<Subject> = arrayListOf()
     // The countdown amount
-    private var countDuration: Int = 0
+    private var countDurationSeconds = 0
+    // The current subject index for countdown
+    private var currentSubjectIndex = 0
 
     // The Vibrator for alarm
     private var vibrator: Vibrator? = null
+
+    // The CountDownTimer
+    private var countDownTimer: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
 
         // Retrieve the extra for subject information
-        val subjects = intent.getParcelableArrayListExtra<Subject>(EXTRA_SUBJECT_LIST)
+        val validSubjects = intent.getParcelableArrayListExtra<Subject>(EXTRA_SUBJECT_LIST)
+        // Populate the subjects list for countdown
+        for (subject in validSubjects) subjects.add(subject)
 
         // Instantiate the Fragments and the Presenter
         // TODO: Retrieve whether the option has been enabled from SharedPreferences
@@ -36,20 +45,18 @@ class TimerActivity : AppCompatActivity(),
             alarmFragment = it
         }
 
-        // The first duration that will be displayed on the TimerCountFragment
-        for (subject in subjects) {
-            if (subject.isIncluded) {
-                countDuration = subject.duration * 60 /* In seconds */
-                break
-            }
-        }
+        val firstSubject = subjects[0]
+        countDurationSeconds = firstSubject.duration * 60
 
-        val newCountFragment = TimerCountFragment.newInstance(countDuration).also {
+        val newCountFragment
+                = TimerCountFragment.newInstance(firstSubject.title, countDurationSeconds).also {
             countFragment = it
         }
 
         val newControlFragment = TimerControlFragment.newInstance().also {
             controlFragment = it
+            // Disable the backwards button at first
+            controlFragment?.setBackwardButtonEnabled(false)
         }
 
         // Begin Fragment transaction
@@ -63,14 +70,8 @@ class TimerActivity : AppCompatActivity(),
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
 
-    // Interface for TimerAlarmFragment
-    override fun onChangeVibEnabled(isEnabled: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    // Interface for TimerControlFragment
-    override fun onClickStart() {
-        object : CountDownTimer(countDuration.toLong() * 1000, 1000) {
+    private fun createCountDownTimer(durationSeconds: Int): CountDownTimer {
+        return object : CountDownTimer(durationSeconds.toLong() * 1000, 1000) {
             override fun onFinish() {
                 // Vibrate
                 val vibPattern = longArrayOf(0, 1250, 1000)
@@ -83,24 +84,58 @@ class TimerActivity : AppCompatActivity(),
             }
 
             override fun onTick(millisUntilFinished: Long) {
-                val countLeftSeconds = (millisUntilFinished/1000).toInt()
+                val countLeftSeconds = (millisUntilFinished / 1000).toInt()
                 countFragment?.setCount(countLeftSeconds)
-//                countDuration = (millisUntilFinished/1000).toInt()
+//                countDurationSeconds = (millisUntilFinished/1000).toInt()
             }
-        }.start()
+        }
+    }
+
+    // Interface for TimerAlarmFragment
+    override fun onChangeVibEnabled(isEnabled: Boolean) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    // Interface for TimerControlFragment
+    override fun onClickStart() {
+        countDownTimer = createCountDownTimer(countDurationSeconds)
+        countDownTimer?.start()
     }
 
     override fun onClickStop() {
         vibrator?.cancel()
-        // TODO: Reset the timer
+        countDownTimer?.cancel()
+
+        val subject = subjects[currentSubjectIndex]
+        countFragment?.updateSubject(subject.title, subject.duration * 60)
     }
 
     override fun onClickForwards() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        countDownTimer?.cancel()
+
+        currentSubjectIndex += 1
+        val newSubjectDurationSeconds = subjects[currentSubjectIndex].duration * 60
+        countFragment?.updateSubject(subjects[currentSubjectIndex].title, newSubjectDurationSeconds)
+
+        // Update the CDT duration as well
+        countDurationSeconds = newSubjectDurationSeconds
+
+        if (currentSubjectIndex == subjects.size -1) controlFragment?.setForwardButtonEnabled(false)
+        else if (currentSubjectIndex > 0) controlFragment?.setBackwardButtonEnabled(true)
     }
 
     override fun onClickBackwards() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        countDownTimer?.cancel()
+
+        currentSubjectIndex -= 1
+        val newSubjectDurationSeconds = subjects[currentSubjectIndex].duration * 60
+        countFragment?.updateSubject(subjects[currentSubjectIndex].title, newSubjectDurationSeconds)
+
+        // Update the CDT duration as well
+        countDurationSeconds = newSubjectDurationSeconds
+
+        if (currentSubjectIndex == 0) controlFragment?.setBackwardButtonEnabled(false)
+        else if (currentSubjectIndex < subjects.size -1) controlFragment?.setForwardButtonEnabled(true)
     }
 
     override fun onDestroy() {
