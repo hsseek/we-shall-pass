@@ -1,5 +1,6 @@
 package org.asuscomm.hsseek.weshallpass.starter
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
@@ -8,8 +9,14 @@ import kotlinx.android.synthetic.main.activity_starter.*
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
+import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
 
-class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjectsFragment.OnSubjectInteractionListener {
+const val EXTRA_SUBJECT_LIST = "PASS_SUBJECT_LIST"
+const val TAG = "StarterActivity"
+
+class StarterActivity : AppCompatActivity(), StarterPresenter.View,
+    ExamSubjectsFragment.OnSubjectInteractionListener,
+    ExamStarterFragment.OnClickStartListener {
     private val presenter = StarterPresenter(this)
     private var subjectsFragment: ExamSubjectsFragment? = null
     private var starterFragment: ExamStarterFragment? = null
@@ -29,7 +36,7 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjects
         val lgSubject6 = Subject(getString(R.string.db_lg_6), 20)
 
         val lgExam = Exam(getString(R.string.db_lg_title),
-            mutableListOf(lgSubject1, lgSubject2, lgSubject3, lgSubject4, lgSubject5, lgSubject6)
+            arrayListOf(lgSubject1, lgSubject2, lgSubject3, lgSubject4, lgSubject5, lgSubject6)
         )
 
         // Instantiate the Fragments and the Presenter
@@ -57,6 +64,7 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjects
         starterFragment?.replaceDuration(durationString)
     }
 
+    // Interaction with ExamSubjectsFragment
     override fun onCheckedSubjectChange(position: Int, isChecked: Boolean) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -71,6 +79,11 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View, ExamSubjects
 
     override fun onDeleteSubject(position: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    // Interaction with ExamStarterFragment
+    override fun onClickStart() {
+        presenter.launchTimer()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

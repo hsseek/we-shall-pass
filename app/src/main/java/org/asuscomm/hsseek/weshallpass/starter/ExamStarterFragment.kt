@@ -1,5 +1,6 @@
 package org.asuscomm.hsseek.weshallpass.starter
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -12,6 +13,16 @@ import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
 
 class ExamStarterFragment : Fragment() {
     private var examDuration: String? = null
+    private var listener: OnClickStartListener? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnClickStartListener) {
+            listener = context
+        } else {
+            throw RuntimeException("$context must implement OnClickStartListener")
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -21,8 +32,7 @@ class ExamStarterFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_exam_starter, container, false)
 
         view.button_starter_start.setOnClickListener {
-            val intent = Intent(activity, TimerActivity::class.java)
-            startActivity(intent)
+            listener?.onClickStart()
         }
 
         view.text_starter_examduration.text = examDuration
@@ -33,6 +43,15 @@ class ExamStarterFragment : Fragment() {
     fun replaceDuration(durationString: String) {
         examDuration = durationString
         view?.text_starter_examduration?.text = durationString
+    }
+
+    interface OnClickStartListener {
+        fun onClickStart()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 
     companion object {

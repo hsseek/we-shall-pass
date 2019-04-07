@@ -15,7 +15,7 @@ class ExamSubjectsFragment : Fragment() {
 
     private var listener: OnSubjectInteractionListener? = null
     private var recyclerViewAdapter: SubjectRecyclerViewAdapter? = null
-    var subjects: MutableList<Subject> = mutableListOf()
+    var subjects: MutableList<Subject> = arrayListOf()
         set(value) {
             field = value
             recyclerViewAdapter?.run {
