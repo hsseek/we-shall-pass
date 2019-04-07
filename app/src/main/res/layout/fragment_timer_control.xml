@@ -1,14 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
     tools:context=".timer.TimerControlFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+    <ImageButton
+        android:id="@+id/button_control_start"
+        android:src="@drawable/ic_play_circle"
+        android:tint="@color/colorPrimary"
+        android:background="@null"
+        android:layout_width="@dimen/width_control_button"
+        android:layout_height="@dimen/width_control_button"
+        android:scaleType="fitXY"
+        />
 
-</FrameLayout>
+    <ImageButton
+        android:id="@+id/button_control_stop"
+        android:layout_width="@dimen/width_control_button"
+        android:layout_height="@dimen/width_control_button"
+        android:src="@drawable/ic_stop"
+        android:tint="@color/colorPrimary"
+        android:background="@null"
+        android:scaleType="fitXY"
+        />
+
+    <ImageButton
+        android:id="@+id/button_control_backwards"
+        android:src="@drawable/ic_fast_forward"
+        android:scaleX="-1"
+        android:tint="@color/colorPrimary"
+        android:layout_width="@dimen/width_control_button"
+        android:layout_height="@dimen/width_control_button"
+        android:background="@null"
+        android:scaleType="fitXY"
+        />
+
+    <ImageButton
+        android:id="@+id/button_control_forwards"
+        android:src="@drawable/ic_fast_forward"
+        android:tint="@color/colorPrimary"
+        android:layout_width="@dimen/width_control_button"
+        android:layout_height="@dimen/width_control_button"
+        android:background="@null"
+        android:scaleType="fitXY"
+        />
+
+</LinearLayout>

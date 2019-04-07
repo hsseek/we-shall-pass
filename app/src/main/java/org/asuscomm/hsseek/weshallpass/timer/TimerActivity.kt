@@ -1,7 +1,8 @@
 package org.asuscomm.hsseek.weshallpass.timer
 
+import android.content.Context
+import android.os.*
 import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
 import android.util.Log
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Subject
@@ -9,11 +10,19 @@ import org.asuscomm.hsseek.weshallpass.starter.EXTRA_SUBJECT_LIST
 
 const val TAG = "TimerActivity"
 
-class TimerActivity : AppCompatActivity() {
+class TimerActivity : AppCompatActivity(),
+    TimerAlarmFragment.OnChangeAlarmConfigListener,
+    TimerControlFragment.OnControlInteractionListener {
     // The Fragments
     private var alarmFragment: TimerAlarmFragment? = null
     private var countFragment: TimerCountFragment? = null
     private var controlFragment: TimerControlFragment? = null
+
+    // The countdown amount
+    private var countDuration: Int = 0
+
+    // The Vibrator for alarm
+    private var vibrator: Vibrator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,15 +38,14 @@ class TimerActivity : AppCompatActivity() {
         }
 
         // The first duration that will be displayed on the TimerCountFragment
-        var firstDuration: Int = 0
         for (subject in subjects) {
             if (subject.isIncluded) {
-                firstDuration = subject.duration
+                countDuration = subject.duration
                 break
             }
         }
 
-        val newCountFragment = TimerCountFragment.newInstance(firstDuration).also {
+        val newCountFragment = TimerCountFragment.newInstance(countDuration).also {
             countFragment = it
         }
 
@@ -47,9 +55,55 @@ class TimerActivity : AppCompatActivity() {
 
         // Begin Fragment transaction
         supportFragmentManager.beginTransaction()
-            .add(R.id.frame_timer_top, newAlarmFragment)
+//            .add(R.id.frame_timer_top, newAlarmFragment)
             .add(R.id.frame_timer_middle, newCountFragment)
             .add(R.id.frame_timer_bottom, newControlFragment)
             .commit()
+
+        // Instantiate the vibrator
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+
+    // Interface for TimerAlarmFragment
+    override fun onChangeVibEnabled(isEnabled: Boolean) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    // Interface for TimerControlFragment
+    override fun onClickStart() {
+        object : CountDownTimer(countDuration.toLong(), 1000) {
+            override fun onFinish() {
+                // Vibrate
+                val vibPattern = longArrayOf(1000, 1250)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator?.vibrate(VibrationEffect.createWaveform(vibPattern, 0))
+                } else {
+                    //deprecated in API 26
+                    vibrator?.vibrate(3000)
+                }
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+//                countDuration = (millisUntilFinished/1000).toInt()
+            }
+        }.start()
+    }
+
+    override fun onClickStop() {
+        vibrator?.cancel()
+        // TODO: Reset the timer
+    }
+
+    override fun onClickForwards() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onClickBackwards() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        vibrator = null
     }
 }

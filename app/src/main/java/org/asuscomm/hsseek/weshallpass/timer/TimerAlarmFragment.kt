@@ -36,7 +36,7 @@ class TimerAlarmFragment : Fragment() {
         if (context is OnChangeAlarmConfigListener) {
             listener = context
         } else {
-            throw RuntimeException("$context must implement OnStartClickListener")
+            throw RuntimeException("$context must implement OnChangeAlarmConfigListener")
         }
     }
 
