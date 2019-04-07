@@ -10,7 +10,7 @@ import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
 
 const val EXTRA_SUBJECT_LIST = "PASS_SUBJECT_LIST"
-const val TAG = "StarterActivity"
+private const val TAG = "StarterActivity"
 
 class StarterActivity : AppCompatActivity(), StarterPresenter.View,
     ExamSubjectsFragment.OnSubjectInteractionListener,

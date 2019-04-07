@@ -3,12 +3,11 @@ package org.asuscomm.hsseek.weshallpass.timer
 import android.content.Context
 import android.os.*
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Subject
 import org.asuscomm.hsseek.weshallpass.starter.EXTRA_SUBJECT_LIST
 
-const val TAG = "TimerActivity"
+private const val TAG = "TimerActivity"
 
 class TimerActivity : AppCompatActivity(),
     TimerAlarmFragment.OnChangeAlarmConfigListener,
@@ -40,7 +39,7 @@ class TimerActivity : AppCompatActivity(),
         // The first duration that will be displayed on the TimerCountFragment
         for (subject in subjects) {
             if (subject.isIncluded) {
-                countDuration = subject.duration
+                countDuration = subject.duration * 60 /* In seconds */
                 break
             }
         }
@@ -55,7 +54,7 @@ class TimerActivity : AppCompatActivity(),
 
         // Begin Fragment transaction
         supportFragmentManager.beginTransaction()
-//            .add(R.id.frame_timer_top, newAlarmFragment)
+            .add(R.id.frame_timer_top, newAlarmFragment)
             .add(R.id.frame_timer_middle, newCountFragment)
             .add(R.id.frame_timer_bottom, newControlFragment)
             .commit()
@@ -71,19 +70,21 @@ class TimerActivity : AppCompatActivity(),
 
     // Interface for TimerControlFragment
     override fun onClickStart() {
-        object : CountDownTimer(countDuration.toLong(), 1000) {
+        object : CountDownTimer(countDuration.toLong() * 1000, 1000) {
             override fun onFinish() {
                 // Vibrate
-                val vibPattern = longArrayOf(1000, 1250)
+                val vibPattern = longArrayOf(0, 1250, 1000)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator?.vibrate(VibrationEffect.createWaveform(vibPattern, 0))
+                    vibrator?.vibrate(VibrationEffect.createWaveform(vibPattern, 1))
                 } else {
                     //deprecated in API 26
-                    vibrator?.vibrate(3000)
+                    vibrator?.vibrate(vibPattern, 1)
                 }
             }
 
             override fun onTick(millisUntilFinished: Long) {
+                val countLeftSeconds = (millisUntilFinished/1000).toInt()
+                countFragment?.setCount(countLeftSeconds)
 //                countDuration = (millisUntilFinished/1000).toInt()
             }
         }.start()

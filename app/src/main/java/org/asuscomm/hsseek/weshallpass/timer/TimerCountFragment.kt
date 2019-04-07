@@ -2,21 +2,24 @@ package org.asuscomm.hsseek.weshallpass.timer
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.fragment_timer_count.view.*
 
 import org.asuscomm.hsseek.weshallpass.R
 
 private const val ARG_SUBJECT_DURATION = "ARG_SUBJECT_DURATION"
+private const val TAG = "TimerCountFragment"
 
 class TimerCountFragment : Fragment() {
-    private var subjectDuration: Int = 0
+    private var subjectDurationSeconds: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            subjectDuration = it.getInt(ARG_SUBJECT_DURATION)
+            subjectDurationSeconds = it.getInt(ARG_SUBJECT_DURATION)
         }
     }
 
@@ -24,8 +27,27 @@ class TimerCountFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_timer_count, container, false)
+        val view = inflater.inflate(R.layout.fragment_timer_count, container, false)
+        view.text_count_time.text = formatCountdown(subjectDurationSeconds)
+        return view
+    }
+
+    fun setCount(countLeftSeconds: Int) {
+        val countString = formatCountdown(countLeftSeconds)
+
+        if (countLeftSeconds <= 3) Log.i(TAG, countString)
+        view?.text_count_time?.text = countString
+    }
+
+    private fun formatCountdown(countSeconds: Int): String {
+        val countInMinutes = countSeconds / 60
+        val countInSeconds = countSeconds % 60
+
+        return "${addZeroPadding(countInMinutes)}:${addZeroPadding(countInSeconds)}"
+    }
+
+    private fun addZeroPadding(int: Int): String {
+        return if (int < 10) "0$int" else int.toString()
     }
 
     companion object {
