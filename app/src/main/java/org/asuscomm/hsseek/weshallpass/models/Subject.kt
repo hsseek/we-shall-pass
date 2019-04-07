@@ -7,6 +7,8 @@ class Subject(val title: String, val duration: Int) : Parcelable {
 
     constructor(parcel: Parcel) : this(parcel.readString() ?: "", parcel.readInt())
 
+    var isIncluded = true
+
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.apply {
             writeString(title)

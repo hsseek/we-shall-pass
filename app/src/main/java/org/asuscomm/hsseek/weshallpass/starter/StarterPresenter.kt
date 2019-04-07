@@ -11,24 +11,48 @@ class StarterPresenter(private val view: View) {
         set (value) {
             field = value?.also {
                 view.refreshSubjects(it.subjects)
-                view.refreshTotalDuration(it.duration)
+                view.refreshExamDuration(it.duration)
             }
-
         }
+
 
     fun launchTimer() {
         val activity = view as? Activity
         val intent = Intent(activity, TimerActivity::class.java)
 
         exam?.subjects?.let {
-            intent.putParcelableArrayListExtra(EXTRA_SUBJECT_LIST, it)
+            val validSubject: ArrayList<Subject> = arrayListOf()
+
+            for (subject in it) {
+                if (subject.isIncluded) validSubject.add(subject)
+            }
+
+            intent.putParcelableArrayListExtra(EXTRA_SUBJECT_LIST, validSubject)
         }
 
         activity?.startActivity(intent)
     }
 
+    fun includeSubject(position: Int, isChecked: Boolean) {
+        exam?.subjects?.get(position)?.isIncluded = isChecked
+
+        calculateDuration()
+    }
+
+    private fun calculateDuration() {
+        var examDuration = 0
+
+        exam?.subjects?.let {
+            for (subject in it) {
+                if (subject.isIncluded) examDuration += subject.duration
+            }
+        }
+
+        view.refreshExamDuration(examDuration)
+    }
+
     interface View {
         fun refreshSubjects(subjects: MutableList<Subject>)
-        fun refreshTotalDuration(totalDuration: Int)
+        fun refreshExamDuration(examDuration: Int)
     }
 }

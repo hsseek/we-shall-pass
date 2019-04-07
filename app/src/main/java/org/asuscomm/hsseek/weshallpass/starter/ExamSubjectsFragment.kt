@@ -61,6 +61,7 @@ class ExamSubjectsFragment : Fragment() {
         fun onChangeSubjectTitle(position: Int, changedTitle: String)
         fun onChangeSubjectDuration(position: Int, changedDuration: Int)
         fun onDeleteSubject(position: Int)
+        fun onAddSubject()
     }
 
     companion object {

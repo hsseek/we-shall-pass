@@ -1,6 +1,5 @@
 package org.asuscomm.hsseek.weshallpass.starter
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
@@ -9,7 +8,6 @@ import kotlinx.android.synthetic.main.activity_starter.*
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
-import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
 
 const val EXTRA_SUBJECT_LIST = "PASS_SUBJECT_LIST"
 const val TAG = "StarterActivity"
@@ -59,14 +57,14 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View,
         subjectsFragment?.subjects = subjects
     }
 
-    override fun refreshTotalDuration(totalDuration: Int) {
-        val durationString = totalDuration.toString() + getString(R.string.all_timeunit)
+    override fun refreshExamDuration(examDuration: Int) {
+        val durationString = examDuration.toString() + getString(R.string.all_timeunit)
         starterFragment?.replaceDuration(durationString)
     }
 
     // Interaction with ExamSubjectsFragment
     override fun onCheckedSubjectChange(position: Int, isChecked: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        presenter.includeSubject(position, isChecked)
     }
 
     override fun onChangeSubjectTitle(position: Int, changedTitle: String) {
@@ -78,6 +76,10 @@ class StarterActivity : AppCompatActivity(), StarterPresenter.View,
     }
 
     override fun onDeleteSubject(position: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onAddSubject() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
