@@ -28,7 +28,7 @@ class TimerActivity : AppCompatActivity(),
     private var vibrator: Vibrator? = null
 
     // The CountDownTimer
-    private var countDownTimer: CountDownTimer? = null
+    private var countDownTimer: SecondCountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,8 +70,8 @@ class TimerActivity : AppCompatActivity(),
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
 
-    private fun createCountDownTimer(durationSeconds: Int): CountDownTimer {
-        return object : CountDownTimer(durationSeconds.toLong() * 1000, 1000) {
+    private fun createCountDownTimer(durationSeconds: Int): SecondCountDownTimer {
+        return object : SecondCountDownTimer(durationSeconds) {
             override fun onFinish() {
                 // Vibrate
                 val vibPattern = longArrayOf(0, 1250, 1000)
@@ -83,9 +83,10 @@ class TimerActivity : AppCompatActivity(),
                 }
             }
 
-            override fun onTick(millisUntilFinished: Long) {
-                val countLeftSeconds = (millisUntilFinished / 1000).toInt()
-                countFragment?.setCount(countLeftSeconds)
+            override fun onTick(secondsLeft: Int) {
+                runOnUiThread {
+                    countFragment?.setCount(secondsLeft)
+                }
 //                countDurationSeconds = (millisUntilFinished/1000).toInt()
             }
         }

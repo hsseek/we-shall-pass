@@ -43,7 +43,7 @@ class TimerCountFragment : Fragment() {
     fun setCount(countLeftSeconds: Int) {
         val countString = formatCountdown(countLeftSeconds)
 
-        if (countLeftSeconds <= 3) Log.i(TAG, countString)
+        Log.i(TAG, countString)
         view?.text_count_time?.text = countString
     }
 
