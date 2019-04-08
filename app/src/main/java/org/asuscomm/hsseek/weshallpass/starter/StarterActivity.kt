@@ -4,62 +4,74 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.activity_starter.*
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
 
-const val EXTRA_SUBJECT_LIST = "PASS_SUBJECT_LIST"
-private const val TAG = "StarterActivity"
+const val EXTRA_SUBJECT_LIST = "org.asuscomm.hsseek.weshallpass.starter.PASS_SUBJECT_LIST"
+const val EXTRA_EXAM_TITLE = "org.asuscomm.hsseek.weshallpass.starter.EXAM_TITLE"
+
+private const val TAG_FRAGMENT_STARTER = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_STARTER"
+private const val TAG_FRAGMENT_SUBJECT = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_SUBJECT"
+private const val TAG_LOG = "StarterActivity"
+
+// TODO: Convert the example Exam object to an element of the local DB.
+private val lgExam = Exam("LG 적성 검사",
+    arrayListOf(Subject("언어 이해", 25),
+        Subject("언어 추리", 25),
+        Subject("인문 역량", 15),
+        Subject("수리력", 35),
+        Subject("도형 추리", 20),
+        Subject("도식적 추리", 20))
+)
 
 class StarterActivity : AppCompatActivity(), StarterPresenter.View,
     ExamSubjectsFragment.OnSubjectInteractionListener,
     ExamStarterFragment.OnClickStartListener {
-    private val presenter = StarterPresenter(this)
+    private val presenter = StarterPresenter(this, lgExam)
     private var subjectsFragment: ExamSubjectsFragment? = null
     private var starterFragment: ExamStarterFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // TODO: Restore Subjects' configuration on rotation
         super.onCreate(savedInstanceState)
+
         // Initialize the views
         setContentView(R.layout.activity_starter)
         setSupportActionBar(toolbar)
 
-        // TODO: Convert the example Exam object to an element of the local DB.
-        val lgSubject1 = Subject(getString(R.string.db_lg_1), 25)
-        val lgSubject2 = Subject(getString(R.string.db_lg_2), 25)
-        val lgSubject3 = Subject(getString(R.string.db_lg_3), 15)
-        val lgSubject4 = Subject(getString(R.string.db_lg_4), 35)
-        val lgSubject5 = Subject(getString(R.string.db_lg_5), 20)
-        val lgSubject6 = Subject(getString(R.string.db_lg_6), 20)
-
-        val lgExam = Exam(getString(R.string.db_lg_title),
-            arrayListOf(lgSubject1, lgSubject2, lgSubject3, lgSubject4, lgSubject5, lgSubject6)
-        )
-
-        // Instantiate the Fragments and the Presenter
-        val newStarterFragment = ExamStarterFragment.newInstance().also {
-            starterFragment = it
-        }
-        val newSubjectsFragment = ExamSubjectsFragment.newInstance().also {
-            subjectsFragment = it
-        }
         presenter.exam = lgExam
 
+        // Instantiate the Fragments and the Presenter
+        if (savedInstanceState == null) {
+            starterFragment = ExamStarterFragment.newInstance(presenter.exam.duration)
+            subjectsFragment = ExamSubjectsFragment.newInstance(presenter.exam.subjects)
+        } else {
+            starterFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_STARTER) as? ExamStarterFragment
+            subjectsFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_SUBJECT) as? ExamSubjectsFragment
+        }
+
+        val transaction = supportFragmentManager.beginTransaction()
+
         // Begin Fragment transaction
-        supportFragmentManager.beginTransaction()
-            .add(R.id.frame_starter_top, newSubjectsFragment)
-            .add(R.id.frame_starter_bottom, newStarterFragment)
-            .commit()
+        subjectsFragment?.let {
+            transaction.replace(R.id.frame_starter_subjects, it, TAG_FRAGMENT_SUBJECT)
+        }
+        starterFragment?.let {
+            transaction.replace(R.id.frame_starter_starter, it, TAG_FRAGMENT_STARTER)
+        }
+
+        transaction.commit()
     }
 
-    override fun refreshSubjects(subjects: MutableList<Subject>) {
+    override fun refreshSubjects(subjects: ArrayList<Subject>) {
         subjectsFragment?.subjects = subjects
     }
 
     override fun refreshExamDuration(examDuration: Int) {
-        val durationString = examDuration.toString() + getString(R.string.all_timeunit)
-        starterFragment?.replaceDuration(durationString)
+        starterFragment?.replaceDuration(examDuration)
     }
 
     // Interaction with ExamSubjectsFragment

@@ -11,10 +11,4 @@
     <string name="alarm_vibration">진동</string>
 
     <string name="db_lg_title">LG 인적성 검사</string>
-    <string name="db_lg_1">언어 이해</string>
-    <string name="db_lg_2">언어 추리</string>
-    <string name="db_lg_3">인문 역량</string>
-    <string name="db_lg_4">수리력</string>
-    <string name="db_lg_5">도형 추리</string>
-    <string name="db_lg_6">도식적 추리</string>
 </resources>

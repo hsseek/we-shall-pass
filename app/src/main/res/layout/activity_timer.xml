@@ -9,21 +9,21 @@
     tools:context=".timer.TimerActivity">
     
     <FrameLayout
-        android:id="@+id/frame_timer_top"
+        android:id="@+id/frame_timer_alarms"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"
         />
 
     <FrameLayout
-        android:id="@+id/frame_timer_middle"
+        android:id="@+id/frame_timer_counter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         />
 
     <FrameLayout
-        android:id="@+id/frame_timer_bottom"
+        android:id="@+id/frame_timer_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0"

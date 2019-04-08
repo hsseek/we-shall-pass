@@ -3,6 +3,7 @@ package org.asuscomm.hsseek.weshallpass.starter
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -93,7 +94,10 @@ class SubjectRecyclerViewAdapter(
         }
     }
 
-    override fun getItemCount(): Int = subjects.size + 1
+    override fun getItemCount(): Int {
+        Log.d("SubjectRecyclerView", "subjects.size: ${subjects.size}")
+        return subjects.size + 1
+    }
 
     inner class SubjectViewHolder(mView: View) : RecyclerView.ViewHolder(mView) {
         val subjectInclude: CheckBox = mView.checkbox_subject_include

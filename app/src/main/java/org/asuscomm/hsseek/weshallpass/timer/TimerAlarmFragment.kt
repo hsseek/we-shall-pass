@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.fragment_timer_alarm.view.*
 
 import org.asuscomm.hsseek.weshallpass.R
 
@@ -13,13 +14,13 @@ private const val ARG_VIBRATION_ENABLED = "VIBRATION_ENABLED"
 
 class TimerAlarmFragment : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: Boolean = false
+    private var vibEnabled: Boolean = false
     private var listener: OnChangeAlarmConfigListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getBoolean(ARG_VIBRATION_ENABLED)
+            vibEnabled = it.getBoolean(ARG_VIBRATION_ENABLED)
         }
     }
 
@@ -27,8 +28,11 @@ class TimerAlarmFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_timer_alarm, container, false)
+        val view = inflater.inflate(R.layout.fragment_timer_alarm, container, false)
+
+        view.checkbox_alarm_vibration.isChecked = vibEnabled
+
+        return view
     }
 
     override fun onAttach(context: Context) {

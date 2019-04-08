@@ -12,17 +12,20 @@ import org.asuscomm.hsseek.weshallpass.R
 
 private const val ARG_SUBJECT_DURATION = "ARG_SUBJECT_DURATION"
 private const val ARG_SUBJECT_TITLE = "ARG_SUBJECT_TITLE"
+private const val ARG_EXAM_TITLE = "ARG_EXAM_TITLE"
 private const val TAG = "TimerCountFragment"
 
 class TimerCountFragment : Fragment() {
     private var subjectDurationSeconds = 0
     private var subjectTitle: String? = null
+    private var examTitle: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             subjectDurationSeconds = it.getInt(ARG_SUBJECT_DURATION)
             subjectTitle = it.getString(ARG_SUBJECT_TITLE) ?: getString(R.string.subject_na)
+            examTitle = it.getString(ARG_EXAM_TITLE) ?: ""
         }
     }
 
@@ -33,7 +36,8 @@ class TimerCountFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_timer_count, container, false)
 
         with(view) {
-            text_count_title.text = subjectTitle
+            text_count_examtitle.text = examTitle
+            text_count_subjecttitle.text = subjectTitle
             text_count_time.text = formatCountdown(subjectDurationSeconds)
         }
 
@@ -60,18 +64,19 @@ class TimerCountFragment : Fragment() {
 
     fun updateSubject(title: String, durationSeconds: Int) {
         view?.let {
-            it.text_count_title?.text = title
+            it.text_count_subjecttitle?.text = title
             it.text_count_time?.text = formatCountdown(durationSeconds)
         }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(subjectTitle: String, subjectDuration: Int) =
+        fun newInstance(examTitle: String, subjectTitle: String, subjectDuration: Int) =
             TimerCountFragment().apply {
                 arguments = Bundle().apply {
                     putInt(ARG_SUBJECT_DURATION, subjectDuration)
                     putString(ARG_SUBJECT_TITLE, subjectTitle)
+                    putString(ARG_EXAM_TITLE, examTitle)
                 }
             }
     }

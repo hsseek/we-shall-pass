@@ -1,7 +1,6 @@
 package org.asuscomm.hsseek.weshallpass.starter
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -9,10 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_exam_starter.view.*
 import org.asuscomm.hsseek.weshallpass.R
-import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
+
+const val ARG_EXAM_DURATION = "EXAM_DURATION"
 
 class ExamStarterFragment : Fragment() {
-    private var examDuration: String? = null
+    private var examDuration: Int = 0
     private var listener: OnClickStartListener? = null
 
     override fun onAttach(context: Context) {
@@ -21,6 +21,13 @@ class ExamStarterFragment : Fragment() {
             listener = context
         } else {
             throw RuntimeException("$context must implement OnClickStartListener")
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            examDuration = it.getInt(ARG_EXAM_DURATION, 0)
         }
     }
 
@@ -35,15 +42,17 @@ class ExamStarterFragment : Fragment() {
             listener?.onClickStart()
         }
 
-        view.text_starter_examduration.text = examDuration
+        view.text_starter_examduration.text = formatDuration(examDuration)
 
         return view
     }
 
-    fun replaceDuration(durationString: String) {
-        examDuration = durationString
-        view?.text_starter_examduration?.text = durationString
+    fun replaceDuration(duration: Int) {
+        examDuration = duration
+        view?.text_starter_examduration?.text = formatDuration(duration)
     }
+
+    private fun formatDuration(duration: Int) = duration.toString() + getString(R.string.all_timeunit)
 
     interface OnClickStartListener {
         fun onClickStart()
@@ -56,6 +65,10 @@ class ExamStarterFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = ExamStarterFragment()
+        fun newInstance(examDuration: Int) = ExamStarterFragment().apply {
+            arguments = Bundle().apply {
+                putInt(ARG_EXAM_DURATION, examDuration)
+            }
+        }
     }
 }

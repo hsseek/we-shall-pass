@@ -8,7 +8,14 @@
     tools:context=".timer.TimerCountFragment">
 
     <TextView
-        android:id="@+id/text_count_title"
+        android:id="@+id/text_count_examtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text = "LG 적성 검사"
+        />
+
+    <TextView
+        android:id="@+id/text_count_subjecttitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="40sp"

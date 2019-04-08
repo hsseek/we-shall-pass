@@ -3,11 +3,16 @@ package org.asuscomm.hsseek.weshallpass.timer
 import android.content.Context
 import android.os.*
 import android.support.v7.app.AppCompatActivity
+import android.widget.FrameLayout
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Subject
+import org.asuscomm.hsseek.weshallpass.starter.EXTRA_EXAM_TITLE
 import org.asuscomm.hsseek.weshallpass.starter.EXTRA_SUBJECT_LIST
 
-private const val TAG = "TimerActivity"
+private const val TAG_LOG = "TimerActivity"
+private const val TAG_FRAGMENT_ALARM = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_ALARM"
+private const val TAG_FRAGMENT_COUNT = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_COUNT"
+private const val TAG_FRAGMENT_CONTROL = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_CONTROL"
 
 class TimerActivity : AppCompatActivity(),
     TimerAlarmFragment.OnChangeAlarmConfigListener,
@@ -31,8 +36,12 @@ class TimerActivity : AppCompatActivity(),
     private var countDownTimer: SecondCountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // TODO: Restore timer status(alarms, counts and the control buttons) on rotation
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
+
+        // Retrieve the extra for exam title
+        val examTitle = intent.getStringExtra(EXTRA_EXAM_TITLE)
 
         // Retrieve the extra for subject information
         val validSubjects = intent.getParcelableArrayListExtra<Subject>(EXTRA_SUBJECT_LIST)
@@ -40,31 +49,39 @@ class TimerActivity : AppCompatActivity(),
         for (subject in validSubjects) subjects.add(subject)
 
         // Instantiate the Fragments and the Presenter
-        // TODO: Retrieve whether the option has been enabled from SharedPreferences
-        val newAlarmFragment = TimerAlarmFragment.newInstance(true).also {
-            alarmFragment = it
-        }
+        if (savedInstanceState == null) {
+            // TODO: Retrieve whether the option has been enabled from SharedPreferences
+            alarmFragment = TimerAlarmFragment.newInstance(true)
 
-        val firstSubject = subjects[0]
-        countDurationSeconds = firstSubject.duration * 60
+            val firstSubject = subjects[0]
+            countDurationSeconds = firstSubject.duration * 60
 
-        val newCountFragment
-                = TimerCountFragment.newInstance(firstSubject.title, countDurationSeconds).also {
-            countFragment = it
-        }
+            countFragment = TimerCountFragment.newInstance(examTitle, firstSubject.title, countDurationSeconds)
 
-        val newControlFragment = TimerControlFragment.newInstance().also {
-            controlFragment = it
-            // Disable the backwards button at first
-            controlFragment?.setBackwardButtonEnabled(false)
+            controlFragment = TimerControlFragment.newInstance().apply {
+                // Disable the backwards button at first
+                setBackwardButtonEnabled(false)
+            }
+        } else {
+            alarmFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_ALARM) as? TimerAlarmFragment
+            countFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_COUNT) as? TimerCountFragment
+            controlFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_CONTROL) as? TimerControlFragment
         }
 
         // Begin Fragment transaction
-        supportFragmentManager.beginTransaction()
-            .add(R.id.frame_timer_top, newAlarmFragment)
-            .add(R.id.frame_timer_middle, newCountFragment)
-            .add(R.id.frame_timer_bottom, newControlFragment)
-            .commit()
+        val transaction = supportFragmentManager.beginTransaction()
+
+        alarmFragment?.let {
+            transaction.replace(R.id.frame_timer_alarms, it, TAG_FRAGMENT_ALARM)
+        }
+        countFragment?.let {
+            transaction.replace(R.id.frame_timer_counter, it, TAG_FRAGMENT_COUNT)
+        }
+        controlFragment?.let {
+            transaction.replace(R.id.frame_timer_controls, it, TAG_FRAGMENT_CONTROL)
+        }
+
+        transaction.commit()
 
         // Instantiate the vibrator
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

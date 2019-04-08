@@ -5,17 +5,21 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Subject
 
+private const val TAG = "ExamSubjectsFragment"
+const val ARG_SUBJECT_CONFIG = "ARG_SUBJECT_CONFIG"
+
 class ExamSubjectsFragment : Fragment() {
 
     private var listener: OnSubjectInteractionListener? = null
     private var recyclerViewAdapter: SubjectRecyclerViewAdapter? = null
-    var subjects: MutableList<Subject> = arrayListOf()
+    var subjects: ArrayList<Subject> = arrayListOf()
         set(value) {
             field = value
             recyclerViewAdapter?.run {
@@ -23,6 +27,14 @@ class ExamSubjectsFragment : Fragment() {
                 notifyDataSetChanged()
             }
         }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate called.")
+        arguments?.let {
+            subjects = it.getParcelableArrayList(ARG_SUBJECT_CONFIG) ?: arrayListOf()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,6 +78,10 @@ class ExamSubjectsFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = ExamSubjectsFragment()
+        fun newInstance(subjects: ArrayList<Subject>) = ExamSubjectsFragment().apply {
+            arguments = Bundle().apply {
+                putParcelableArrayList(ARG_SUBJECT_CONFIG, subjects)
+            }
+        }
     }
 }

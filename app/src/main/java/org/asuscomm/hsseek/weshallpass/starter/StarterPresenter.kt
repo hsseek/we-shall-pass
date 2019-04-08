@@ -6,10 +6,10 @@ import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
 import org.asuscomm.hsseek.weshallpass.timer.TimerActivity
 
-class StarterPresenter(private val view: View) {
-    var exam: Exam? = null
+class StarterPresenter(private val view: View, exam: Exam) {
+    var exam = exam
         set (value) {
-            field = value?.also {
+            field = value.also {
                 view.refreshSubjects(it.subjects)
                 view.refreshExamDuration(it.duration)
             }
@@ -18,9 +18,11 @@ class StarterPresenter(private val view: View) {
 
     fun launchTimer() {
         val activity = view as? Activity
-        val intent = Intent(activity, TimerActivity::class.java)
+        val intent = Intent(activity, TimerActivity::class.java).apply {
+            putExtra(EXTRA_EXAM_TITLE, exam.title)
+        }
 
-        exam?.subjects?.let {
+        exam.subjects.let {
             val validSubject: ArrayList<Subject> = arrayListOf()
 
             for (subject in it) {
@@ -34,7 +36,7 @@ class StarterPresenter(private val view: View) {
     }
 
     fun includeSubject(position: Int, isChecked: Boolean) {
-        exam?.subjects?.get(position)?.isIncluded = isChecked
+        exam.subjects[position].isIncluded = isChecked
 
         calculateDuration()
     }
@@ -42,7 +44,7 @@ class StarterPresenter(private val view: View) {
     private fun calculateDuration() {
         var examDuration = 0
 
-        exam?.subjects?.let {
+        exam.subjects.let {
             for (subject in it) {
                 if (subject.isIncluded) examDuration += subject.duration
             }
@@ -52,7 +54,7 @@ class StarterPresenter(private val view: View) {
     }
 
     interface View {
-        fun refreshSubjects(subjects: MutableList<Subject>)
+        fun refreshSubjects(subjects: ArrayList<Subject>)
         fun refreshExamDuration(examDuration: Int)
     }
 }
