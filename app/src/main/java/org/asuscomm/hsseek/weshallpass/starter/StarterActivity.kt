@@ -10,9 +10,6 @@ import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Exam
 import org.asuscomm.hsseek.weshallpass.models.Subject
 
-const val EXTRA_SUBJECT_LIST = "org.asuscomm.hsseek.weshallpass.starter.PASS_SUBJECT_LIST"
-const val EXTRA_EXAM_TITLE = "org.asuscomm.hsseek.weshallpass.starter.EXAM_TITLE"
-
 private const val TAG_FRAGMENT_STARTER = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_STARTER"
 private const val TAG_FRAGMENT_SUBJECT = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_SUBJECT"
 private const val TAG_LOG = "StarterActivity"

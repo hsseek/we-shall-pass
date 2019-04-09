@@ -95,7 +95,6 @@ class SubjectRecyclerViewAdapter(
     }
 
     override fun getItemCount(): Int {
-        Log.d("SubjectRecyclerView", "subjects.size: ${subjects.size}")
         return subjects.size + 1
     }
 

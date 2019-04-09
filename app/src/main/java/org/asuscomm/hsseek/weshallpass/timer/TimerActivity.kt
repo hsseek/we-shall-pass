@@ -1,112 +1,179 @@
 package org.asuscomm.hsseek.weshallpass.timer
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.*
 import android.support.v7.app.AppCompatActivity
-import android.widget.FrameLayout
+import android.util.Log
+import android.view.WindowManager
+import org.asuscomm.hsseek.weshallpass.CountDownService
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Subject
-import org.asuscomm.hsseek.weshallpass.starter.EXTRA_EXAM_TITLE
-import org.asuscomm.hsseek.weshallpass.starter.EXTRA_SUBJECT_LIST
+import org.asuscomm.hsseek.weshallpass.starter.StarterActivity
 
 private const val TAG_LOG = "TimerActivity"
 private const val TAG_FRAGMENT_ALARM = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_ALARM"
 private const val TAG_FRAGMENT_COUNT = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_COUNT"
 private const val TAG_FRAGMENT_CONTROL = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_CONTROL"
 
+const val EXTRA_TIMEUP_BOOLEAN = "org.asuscomm.hsseek.weshallpass.starter.EXTRA_TIMEUP"
+const val EXTRA_SUBJECTS_ARRAY_LIST = "org.asuscomm.hsseek.weshallpass.starter.PASS_SUBJECT_LIST"
+const val EXTRA_EXAM_TITLE_STRING = "org.asuscomm.hsseek.weshallpass.starter.EXAM_TITLE"
+
 class TimerActivity : AppCompatActivity(),
     TimerAlarmFragment.OnChangeAlarmConfigListener,
-    TimerControlFragment.OnControlInteractionListener {
+    TimerControlFragment.OnControlInteractionListener,
+    CountDownService.OnCountDownListener {
+    // The Vibrator for alarm
+    private lateinit var mVibrator: Vibrator
+
     // The Fragments
-    private var alarmFragment: TimerAlarmFragment? = null
-    private var countFragment: TimerCountFragment? = null
-    private var controlFragment: TimerControlFragment? = null
+    private var mAlarmFragment: TimerAlarmFragment? = null
+    private var mCountFragment: TimerCountFragment? = null
+    private var mControlFragment: TimerControlFragment? = null
 
     // The valid Subjects
-    private val subjects: ArrayList<Subject> = arrayListOf()
+    private val mSubjects: ArrayList<Subject> = arrayListOf()
+    // The exam title
+    private var mExamTitle: String? = null
+
     // The countdown amount
-    private var countDurationSeconds = 0
+    private var mCountDurationSeconds = 0
     // The current subject index for countdown
-    private var currentSubjectIndex = 0
+    private var mCurrentSubjectIndex = 0
 
-    // The Vibrator for alarm
-    private var vibrator: Vibrator? = null
+    // Variables regarding Service
+    private lateinit var mService: CountDownService
+    private var mBound = false
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as CountDownService.CountDownBinder
+            mService = binder.getService().apply {
+                registerListener(this@TimerActivity)
+            }
+            mBound = true
 
-    // The CountDownTimer
-    private var countDownTimer: SecondCountDownTimer? = null
+            Log.d(TAG_LOG, "Service bound.")
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            mBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // TODO: Restore timer status(alarms, counts and the control buttons) on rotation
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
 
+        // Instantiate the mVibrator
+        mVibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        // Keep screen on
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         // Retrieve the extra for exam title
-        val examTitle = intent.getStringExtra(EXTRA_EXAM_TITLE)
+        mExamTitle = intent.getStringExtra(EXTRA_EXAM_TITLE_STRING)
 
         // Retrieve the extra for subject information
-        val validSubjects = intent.getParcelableArrayListExtra<Subject>(EXTRA_SUBJECT_LIST)
-        // Populate the subjects list for countdown
-        for (subject in validSubjects) subjects.add(subject)
+        val validSubjects = intent.getParcelableArrayListExtra<Subject>(EXTRA_SUBJECTS_ARRAY_LIST)
+        // Populate the mSubjects list for countdown
+        for (subject in validSubjects) mSubjects.add(subject)
+
+        // Should the alarm go off?
+        val isTimeUp = intent.getBooleanExtra(EXTRA_TIMEUP_BOOLEAN, false)
 
         // Instantiate the Fragments and the Presenter
         if (savedInstanceState == null) {
             // TODO: Retrieve whether the option has been enabled from SharedPreferences
-            alarmFragment = TimerAlarmFragment.newInstance(true)
+            mAlarmFragment = TimerAlarmFragment.newInstance(true)
 
-            val firstSubject = subjects[0]
-            countDurationSeconds = firstSubject.duration * 60
+            val firstSubject = mSubjects[0]
+            mCountDurationSeconds = firstSubject.duration * 60
 
-            countFragment = TimerCountFragment.newInstance(examTitle, firstSubject.title, countDurationSeconds)
+            val initialDuration = if (isTimeUp) 0 else mCountDurationSeconds
+            mCountFragment = TimerCountFragment.newInstance(mExamTitle?:"", firstSubject.title, initialDuration)
 
-            controlFragment = TimerControlFragment.newInstance().apply {
-                // Disable the backwards button at first
-                setBackwardButtonEnabled(false)
-            }
+            mControlFragment = TimerControlFragment.newInstance()
         } else {
-            alarmFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_ALARM) as? TimerAlarmFragment
-            countFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_COUNT) as? TimerCountFragment
-            controlFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_CONTROL) as? TimerControlFragment
+            mAlarmFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_ALARM) as? TimerAlarmFragment
+            mCountFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_COUNT) as? TimerCountFragment
+            mControlFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_CONTROL) as? TimerControlFragment
         }
 
         // Begin Fragment transaction
         val transaction = supportFragmentManager.beginTransaction()
 
-        alarmFragment?.let {
+        mAlarmFragment?.let {
             transaction.replace(R.id.frame_timer_alarms, it, TAG_FRAGMENT_ALARM)
         }
-        countFragment?.let {
+        mCountFragment?.let {
             transaction.replace(R.id.frame_timer_counter, it, TAG_FRAGMENT_COUNT)
         }
-        controlFragment?.let {
+        mControlFragment?.let {
             transaction.replace(R.id.frame_timer_controls, it, TAG_FRAGMENT_CONTROL)
         }
 
         transaction.commit()
 
-        // Instantiate the vibrator
-        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (isTimeUp) goOffAlarm()
     }
 
-    private fun createCountDownTimer(durationSeconds: Int): SecondCountDownTimer {
-        return object : SecondCountDownTimer(durationSeconds) {
-            override fun onFinish() {
-                // Vibrate
-                val vibPattern = longArrayOf(0, 1250, 1000)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator?.vibrate(VibrationEffect.createWaveform(vibPattern, 1))
-                } else {
-                    //deprecated in API 26
-                    vibrator?.vibrate(vibPattern, 1)
-                }
-            }
-
-            override fun onTick(secondsLeft: Int) {
-                runOnUiThread {
-                    countFragment?.setCount(secondsLeft)
-                }
-//                countDurationSeconds = (millisUntilFinished/1000).toInt()
-            }
+    override fun onStart() {
+        super.onStart()
+        Intent(this, CountDownService::class.java).also {
+            bindService(it, connection, Context.BIND_AUTO_CREATE)
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(connection)
+        with(mService){
+            registerListener(null)
+            mExamTitle = this@TimerActivity.mExamTitle
+            mSubjects = this@TimerActivity.mSubjects
+        }
+        mBound = false
+        Log.d(TAG_LOG, "Service unbound.")
+
+        mVibrator.cancel()
+    }
+
+    override fun onBackPressed() {
+        startActivity(Intent(this, StarterActivity::class.java))
+        finish()
+    }
+
+    // Interface for CountDownService
+    override fun refreshCount(secondsLeft: Int) {
+        runOnUiThread {
+            mCountFragment?.setCount(secondsLeft)
+        }
+    }
+
+    override fun resetCount() {
+        mCountFragment?.setCount(mCountDurationSeconds)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        if (intent?.extras?.getBoolean(EXTRA_TIMEUP_BOOLEAN) == true) {
+            goOffAlarm()
+        }
+    }
+
+    private fun goOffAlarm() {
+        val vibPattern = longArrayOf(0, 1250, 1000)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mVibrator.vibrate(VibrationEffect.createWaveform(vibPattern, 1))
+        } else {
+            //deprecated in API 26
+            mVibrator.vibrate(vibPattern, 1)
+        }
+
+        mCountFragment?.setCount(0)
     }
 
     // Interface for TimerAlarmFragment
@@ -116,48 +183,44 @@ class TimerActivity : AppCompatActivity(),
 
     // Interface for TimerControlFragment
     override fun onClickStart() {
-        countDownTimer = createCountDownTimer(countDurationSeconds)
-        countDownTimer?.start()
+        mService.startCountDown(mCountDurationSeconds)
     }
 
     override fun onClickStop() {
-        vibrator?.cancel()
-        countDownTimer?.cancel()
+        mVibrator.cancel()
 
-        val subject = subjects[currentSubjectIndex]
-        countFragment?.updateSubject(subject.title, subject.duration * 60)
+        mService.stopCountDown()
+
+        val subject = mSubjects[mCurrentSubjectIndex]
+        // Reset the timer
+        mCountFragment?.updateSubject(subject.title, subject.duration * 60)
     }
 
     override fun onClickForwards() {
-        countDownTimer?.cancel()
+        mService.stopCountDown()
 
-        currentSubjectIndex += 1
-        val newSubjectDurationSeconds = subjects[currentSubjectIndex].duration * 60
-        countFragment?.updateSubject(subjects[currentSubjectIndex].title, newSubjectDurationSeconds)
+        mCurrentSubjectIndex += 1
+        val newSubjectDurationSeconds = mSubjects[mCurrentSubjectIndex].duration * 60
+        mCountFragment?.updateSubject(mSubjects[mCurrentSubjectIndex].title, newSubjectDurationSeconds)
 
         // Update the CDT duration as well
-        countDurationSeconds = newSubjectDurationSeconds
+        mCountDurationSeconds = newSubjectDurationSeconds
 
-        if (currentSubjectIndex == subjects.size -1) controlFragment?.setForwardButtonEnabled(false)
-        else if (currentSubjectIndex > 0) controlFragment?.setBackwardButtonEnabled(true)
+        if (mCurrentSubjectIndex == mSubjects.size - 1) mControlFragment?.setForwardButtonEnabled(false)
+        else if (mCurrentSubjectIndex > 0) mControlFragment?.setBackwardButtonEnabled(true)
     }
 
     override fun onClickBackwards() {
-        countDownTimer?.cancel()
+        mService.stopCountDown()
 
-        currentSubjectIndex -= 1
-        val newSubjectDurationSeconds = subjects[currentSubjectIndex].duration * 60
-        countFragment?.updateSubject(subjects[currentSubjectIndex].title, newSubjectDurationSeconds)
+        mCurrentSubjectIndex -= 1
+        val newSubjectDurationSeconds = mSubjects[mCurrentSubjectIndex].duration * 60
+        mCountFragment?.updateSubject(mSubjects[mCurrentSubjectIndex].title, newSubjectDurationSeconds)
 
         // Update the CDT duration as well
-        countDurationSeconds = newSubjectDurationSeconds
+        mCountDurationSeconds = newSubjectDurationSeconds
 
-        if (currentSubjectIndex == 0) controlFragment?.setBackwardButtonEnabled(false)
-        else if (currentSubjectIndex < subjects.size -1) controlFragment?.setForwardButtonEnabled(true)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        vibrator = null
+        if (mCurrentSubjectIndex == 0) mControlFragment?.setBackwardButtonEnabled(false)
+        else if (mCurrentSubjectIndex < mSubjects.size - 1) mControlFragment?.setForwardButtonEnabled(true)
     }
 }

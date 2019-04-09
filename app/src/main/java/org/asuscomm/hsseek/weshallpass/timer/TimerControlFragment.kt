@@ -3,13 +3,18 @@ package org.asuscomm.hsseek.weshallpass.timer
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import kotlinx.android.synthetic.main.fragment_subjects.*
 import kotlinx.android.synthetic.main.fragment_timer_control.view.*
 
 import org.asuscomm.hsseek.weshallpass.R
+
+private const val TAG_LOG = "TimerControlFragment"
 
 class TimerControlFragment : Fragment() {
     private var listener: OnControlInteractionListener? = null
@@ -36,16 +41,24 @@ class TimerControlFragment : Fragment() {
             enableStartButton(true)
         }
 
-        view.button_control_backwards.setOnClickListener {
-            listener?.onClickBackwards()
-            enableStartButton(true)
+        with(view.button_control_backwards) {
+            setOnClickListener {
+                listener?.onClickBackwards()
+                enableStartButton(true)
+            }
+            isClickable = false
         }
+
         return view
     }
 
     private fun enableStartButton(enable: Boolean) {
-        view?.button_control_start?.isEnabled = enable
-        // TODO: Implement the pause button (Store the left seconds from onTick and resume from the point)
+        val button = view?.button_control_start
+
+        button?.isClickable = enable
+        if (enable) button?.setImageResource(R.drawable.ic_play_circle) else {
+            button?.setImageResource(R.drawable.ic_pause_circle)
+        }
     }
 
     override fun onAttach(context: Context) {
@@ -63,11 +76,25 @@ class TimerControlFragment : Fragment() {
     }
 
     fun setForwardButtonEnabled(enable: Boolean) {
-        view?.button_control_forwards?.isEnabled = enable
+        view?.button_control_forwards?.let {
+            setButtonEnabled(it, enable)
+        }
     }
 
     fun setBackwardButtonEnabled(enable: Boolean) {
-        view?.button_control_backwards?.isEnabled = enable
+        view?.button_control_backwards?.let {
+            setButtonEnabled(it, enable)
+        }
+    }
+
+    private fun setButtonEnabled(button: ImageButton, enable: Boolean) {
+        button.isClickable = enable
+
+        if (enable) {
+            button.setColorFilter(ContextCompat.getColor(requireContext(), R.color.colorPrimary))
+        } else {
+            button.setColorFilter(ContextCompat.getColor(requireContext(), R.color.grey))
+        }
     }
 
     interface OnControlInteractionListener {

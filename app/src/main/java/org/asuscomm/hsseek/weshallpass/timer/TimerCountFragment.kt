@@ -2,6 +2,7 @@ package org.asuscomm.hsseek.weshallpass.timer
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +14,7 @@ import org.asuscomm.hsseek.weshallpass.R
 private const val ARG_SUBJECT_DURATION = "ARG_SUBJECT_DURATION"
 private const val ARG_SUBJECT_TITLE = "ARG_SUBJECT_TITLE"
 private const val ARG_EXAM_TITLE = "ARG_EXAM_TITLE"
-private const val TAG = "TimerCountFragment"
+private const val TAG_LOG = "TimerCountFragment"
 
 class TimerCountFragment : Fragment() {
     private var subjectDurationSeconds = 0
@@ -39,16 +40,19 @@ class TimerCountFragment : Fragment() {
             text_count_examtitle.text = examTitle
             text_count_subjecttitle.text = subjectTitle
             text_count_time.text = formatCountdown(subjectDurationSeconds)
+            if (subjectDurationSeconds <= 0) text_count_time.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
         }
 
         return view
     }
 
     fun setCount(countLeftSeconds: Int) {
-        val countString = formatCountdown(countLeftSeconds)
+        val textView = view?.text_count_time
+        textView?.text = formatCountdown(countLeftSeconds)
 
-        Log.i(TAG, countString)
-        view?.text_count_time?.text = countString
+        if (countLeftSeconds <= 0) {
+            textView?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        }
     }
 
     private fun formatCountdown(countSeconds: Int): String {
@@ -66,6 +70,10 @@ class TimerCountFragment : Fragment() {
         view?.let {
             it.text_count_subjecttitle?.text = title
             it.text_count_time?.text = formatCountdown(durationSeconds)
+
+            if (durationSeconds > 0) {
+                it.text_count_time?.setTextColor(ContextCompat.getColor(requireContext(), R.color.default_text))
+            }
         }
     }
 

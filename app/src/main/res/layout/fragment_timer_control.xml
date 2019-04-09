@@ -31,7 +31,7 @@
         android:id="@+id/button_control_backwards"
         android:src="@drawable/ic_fast_forward"
         android:scaleX="-1"
-        android:tint="@color/colorPrimary"
+        android:tint="@color/grey"
         android:layout_width="@dimen/width_control_button"
         android:layout_height="@dimen/width_control_button"
         android:background="@null"

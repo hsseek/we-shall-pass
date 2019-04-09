@@ -27,7 +27,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toLeftOf="@id/frame_timer_alarms"
-        app:layout_constraintHorizontal_weight="2"
+        app:layout_constraintHorizontal_weight="2.5"
         />
 
     <FrameLayout

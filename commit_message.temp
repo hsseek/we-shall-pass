@@ -1,2 +1,2 @@
-  - Implement timer 
-  - Fix TimerCountFragment not visible (height of 0dp) 
+  - Prevent dimming the screen
+  - TimerActivity's back button always launches StarterActivity
