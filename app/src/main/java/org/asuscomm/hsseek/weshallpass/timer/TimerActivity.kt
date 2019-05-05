@@ -85,7 +85,6 @@ class TimerActivity : AppCompatActivity(),
         for (subject in validSubjects) mSubjects.add(subject)
 
         if (intent.getBooleanExtra(EXTRA_CONTINUE_COUNTDOWN, false)) {
-            // TODO: If launched from the PendingIntent of the Notification, bind to the Service and continue counting
             bindService(Intent(this, CountDownService::class.java), connection, Context.BIND_AUTO_CREATE)
             Log.d(TAG_LOG, "Bound to the service")
         }
@@ -129,8 +128,8 @@ class TimerActivity : AppCompatActivity(),
         if (isTimeUp) goOffAlarm()
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
 
         mService?.registerListener(null)
 
@@ -165,6 +164,7 @@ class TimerActivity : AppCompatActivity(),
     }
 
     override fun onNewIntent(intent: Intent?) {
+        Log.d(TAG_LOG, "onNewIntent called: mBound = $mBound")
         if (intent?.extras?.getBoolean(EXTRA_TIMEUP_BOOLEAN) == true) {
             goOffAlarm()
         }

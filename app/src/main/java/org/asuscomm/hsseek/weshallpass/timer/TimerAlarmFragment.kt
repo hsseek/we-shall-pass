@@ -13,7 +13,6 @@ import org.asuscomm.hsseek.weshallpass.R
 private const val ARG_VIBRATION_ENABLED = "VIBRATION_ENABLED"
 
 class TimerAlarmFragment : Fragment() {
-    // TODO: Rename and change types of parameters
     private var vibEnabled: Boolean = false
     private var listener: OnChangeAlarmConfigListener? = null
 
