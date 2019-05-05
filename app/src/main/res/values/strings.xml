@@ -2,13 +2,19 @@
     <string name="app_name">You Shall Pass</string>
     <string name="action_settings">Settings</string>
 
+    <string name="all_timeunit">분</string>
+
     <string name="title_exam_na">시험명</string>
     <string name="subject_na">선택된 과목 없음</string>
     <string name="subject_hint">과목명</string>
     <string name="starter_start">시작</string>
-    <string name="all_timeunit">분</string>
 
     <string name="alarm_vibration">진동</string>
 
+    <string name="notif_channel_description">You Shall Pass 시험 시간 종료 알림</string>
+    <string name="notif_title">시험 시간 타이머</string>
+    <string name="notif_timeup">시험 종료</string>
+
+    <!-- TODO: Remove the temporary strings -->
     <string name="db_lg_title">LG 인적성 검사</string>
 </resources>

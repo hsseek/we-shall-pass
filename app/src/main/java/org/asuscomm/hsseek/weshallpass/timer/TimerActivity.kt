@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.*
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.WindowManager
 import org.asuscomm.hsseek.weshallpass.CountDownService
 import org.asuscomm.hsseek.weshallpass.R
@@ -21,6 +20,7 @@ private const val TAG_FRAGMENT_CONTROL = "org.asuscomm.hsseek.weshallpass.starte
 const val EXTRA_TIMEUP_BOOLEAN = "org.asuscomm.hsseek.weshallpass.starter.EXTRA_TIMEUP"
 const val EXTRA_SUBJECTS_ARRAY_LIST = "org.asuscomm.hsseek.weshallpass.starter.PASS_SUBJECT_LIST"
 const val EXTRA_EXAM_TITLE_STRING = "org.asuscomm.hsseek.weshallpass.starter.EXAM_TITLE"
+const val EXTRA_TIMER_SECONDS_LEFT = "org.asuscomm.hsseek.weshallpass.starter.TIMER_SECONDS_LEFT"
 
 class TimerActivity : AppCompatActivity(),
     TimerAlarmFragment.OnChangeAlarmConfigListener,
@@ -45,8 +45,9 @@ class TimerActivity : AppCompatActivity(),
     private var mCurrentSubjectIndex = 0
 
     // Variables regarding Service
-    private lateinit var mService: CountDownService
+    private var mService: CountDownService? = null
     private var mBound = false
+
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as CountDownService.CountDownBinder
@@ -54,12 +55,11 @@ class TimerActivity : AppCompatActivity(),
                 registerListener(this@TimerActivity)
             }
             mBound = true
-
-            Log.d(TAG_LOG, "Service bound.")
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             mBound = false
+            mService = null
         }
     }
 
@@ -82,10 +82,12 @@ class TimerActivity : AppCompatActivity(),
         // Populate the mSubjects list for countdown
         for (subject in validSubjects) mSubjects.add(subject)
 
+        // TODO: If launched from the PendingIntent of the Notification, bind to the Service and continue counting
+
         // Should the alarm go off?
         val isTimeUp = intent.getBooleanExtra(EXTRA_TIMEUP_BOOLEAN, false)
 
-        // Instantiate the Fragments and the Presenter
+        // Instantiate the Fragments
         if (savedInstanceState == null) {
             // TODO: Retrieve whether the option has been enabled from SharedPreferences
             mAlarmFragment = TimerAlarmFragment.newInstance(true)
@@ -121,29 +123,27 @@ class TimerActivity : AppCompatActivity(),
         if (isTimeUp) goOffAlarm()
     }
 
-    override fun onStart() {
-        super.onStart()
-        Intent(this, CountDownService::class.java).also {
-            bindService(it, connection, Context.BIND_AUTO_CREATE)
-        }
-    }
-
     override fun onStop() {
         super.onStop()
-        unbindService(connection)
-        with(mService){
-            registerListener(null)
-            mExamTitle = this@TimerActivity.mExamTitle
-            mSubjects = this@TimerActivity.mSubjects
-        }
-        mBound = false
-        Log.d(TAG_LOG, "Service unbound.")
 
+        mService?.registerListener(null)
+
+        // Unbind the Service
+        if (mBound) {
+            unbindService(connection)
+            mBound = false
+        }
+
+        // If it was still vibrating, stop it.
         mVibrator.cancel()
     }
 
     override fun onBackPressed() {
-        startActivity(Intent(this, StarterActivity::class.java))
+        val intent = Intent(this, StarterActivity::class.java)
+
+        startActivity(intent.apply {
+            addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        })
         finish()
     }
 
@@ -183,13 +183,26 @@ class TimerActivity : AppCompatActivity(),
 
     // Interface for TimerControlFragment
     override fun onClickStart() {
-        mService.startCountDown(mCountDurationSeconds)
+        val intent = Intent(this, CountDownService::class.java).apply {
+            putExtra(EXTRA_TIMER_SECONDS_LEFT, mCountDurationSeconds)
+            putExtra(EXTRA_EXAM_TITLE_STRING, mExamTitle)
+            putExtra(EXTRA_SUBJECTS_ARRAY_LIST, mSubjects)
+        }
+
+        startService(intent)
+        bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     override fun onClickStop() {
         mVibrator.cancel()
 
-        mService.stopCountDown()
+        if (mBound) {
+            unbindService(connection)
+            mBound = false
+        }
+
+        // Stop the countdown and the Service
+        stopService()
 
         val subject = mSubjects[mCurrentSubjectIndex]
         // Reset the timer
@@ -197,7 +210,8 @@ class TimerActivity : AppCompatActivity(),
     }
 
     override fun onClickForwards() {
-        mService.stopCountDown()
+        // TODO: The notification won't dismiss.
+        stopService()
 
         mCurrentSubjectIndex += 1
         val newSubjectDurationSeconds = mSubjects[mCurrentSubjectIndex].duration * 60
@@ -211,7 +225,7 @@ class TimerActivity : AppCompatActivity(),
     }
 
     override fun onClickBackwards() {
-        mService.stopCountDown()
+        stopService()
 
         mCurrentSubjectIndex -= 1
         val newSubjectDurationSeconds = mSubjects[mCurrentSubjectIndex].duration * 60
@@ -222,5 +236,15 @@ class TimerActivity : AppCompatActivity(),
 
         if (mCurrentSubjectIndex == 0) mControlFragment?.setBackwardButtonEnabled(false)
         else if (mCurrentSubjectIndex < mSubjects.size - 1) mControlFragment?.setForwardButtonEnabled(true)
+    }
+
+    private fun stopService() {
+        // Stop the countdown and the Service
+        mService?.let {
+            it.stopCountDown()
+            it.stopSelf()
+        }
+
+        mService = null
     }
 }

@@ -14,7 +14,8 @@
         <service
             android:name=".CountDownService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false"
+            ></service>
 
         <activity
             android:name=".timer.TimerActivity"

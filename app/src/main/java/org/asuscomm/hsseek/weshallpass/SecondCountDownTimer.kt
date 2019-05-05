@@ -14,10 +14,7 @@ abstract class SecondCountDownTimer(seconds: Int) : Timer() {
 
     override fun cancel() {
         task.cancel()
-    }
-
-    fun createTimerTask(secDuration: Int): TimerTask {
-        return createTimerTask((secDuration * 1000).toLong())
+        purge()
     }
 
     private fun createTimerTask(milliSecDuration: Long): TimerTask = object : TimerTask() {

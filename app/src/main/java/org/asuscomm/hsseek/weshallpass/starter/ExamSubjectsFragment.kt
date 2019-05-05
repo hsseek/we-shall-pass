@@ -30,7 +30,6 @@ class ExamSubjectsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate called.")
         arguments?.let {
             subjects = it.getParcelableArrayList(ARG_SUBJECT_CONFIG) ?: arrayListOf()
         }
