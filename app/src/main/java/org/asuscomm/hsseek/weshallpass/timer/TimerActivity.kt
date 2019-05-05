@@ -6,8 +6,10 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.*
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.WindowManager
 import org.asuscomm.hsseek.weshallpass.CountDownService
+import org.asuscomm.hsseek.weshallpass.EXTRA_CONTINUE_COUNTDOWN
 import org.asuscomm.hsseek.weshallpass.R
 import org.asuscomm.hsseek.weshallpass.models.Subject
 import org.asuscomm.hsseek.weshallpass.starter.StarterActivity
@@ -82,7 +84,11 @@ class TimerActivity : AppCompatActivity(),
         // Populate the mSubjects list for countdown
         for (subject in validSubjects) mSubjects.add(subject)
 
-        // TODO: If launched from the PendingIntent of the Notification, bind to the Service and continue counting
+        if (intent.getBooleanExtra(EXTRA_CONTINUE_COUNTDOWN, false)) {
+            // TODO: If launched from the PendingIntent of the Notification, bind to the Service and continue counting
+            bindService(Intent(this, CountDownService::class.java), connection, Context.BIND_AUTO_CREATE)
+            Log.d(TAG_LOG, "Bound to the service")
+        }
 
         // Should the alarm go off?
         val isTimeUp = intent.getBooleanExtra(EXTRA_TIMEUP_BOOLEAN, false)
@@ -190,7 +196,8 @@ class TimerActivity : AppCompatActivity(),
         }
 
         startService(intent)
-        bindService(intent, connection, Context.BIND_AUTO_CREATE)
+
+        if (!mBound) bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     override fun onClickStop() {

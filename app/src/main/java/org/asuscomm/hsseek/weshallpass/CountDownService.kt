@@ -14,6 +14,7 @@ import org.asuscomm.hsseek.weshallpass.timer.*
 private const val TAG_LOG = "CountDownService"
 const val CHANNEL_ID = "org.asuscomm.hsseek.weshallpass.notification"
 const val NOTIFICATION_ID = 728
+const val EXTRA_CONTINUE_COUNTDOWN = "org.asuscomm.hsseek.weshallpass.EXTRA_CONTINUE_COUNTDOWN"
 
 class CountDownService : Service() {
     var mExamTitle: String? = null
@@ -25,19 +26,11 @@ class CountDownService : Service() {
     private var listener: OnCountDownListener? = null
 
     override fun onBind(intent: Intent): IBinder {
-        Log.d(TAG_LOG, "onBind called($this).")
         return binder
-    }
-
-    override fun onUnbind(intent: Intent?): Boolean {
-        Log.d(TAG_LOG, "onUnbind called($this).")
-        return super.onUnbind(intent)
     }
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG_LOG, "onCreate called($this).")
-
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -71,7 +64,7 @@ class CountDownService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG_LOG, "onDestroy called($this).")
+        Log.d(TAG_LOG, "Service destroyed")
         mCountDownTimer?.cancel()
         mCountDownTimer = null
     }
@@ -83,6 +76,10 @@ class CountDownService : Service() {
     private fun startCountDown(durationSeconds: Int) {
         val pendingIntent: PendingIntent =
             Intent(this, TimerActivity::class.java).putExtras(false).let { notificationIntent ->
+                // Along with the extras, put a marker that the Activity was launched from the PendingIntent
+                // (so that it continues the countdown on launching)
+                notificationIntent.putExtra(EXTRA_CONTINUE_COUNTDOWN, true)
+
                 PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
             }
 
