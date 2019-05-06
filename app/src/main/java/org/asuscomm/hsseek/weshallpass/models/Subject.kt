@@ -5,21 +5,24 @@ import android.os.Parcelable
 
 class Subject(val title: String, val duration: Int) : Parcelable {
 
-    constructor(parcel: Parcel) : this(parcel.readString() ?: "", parcel.readInt())
+    constructor(parcel: Parcel) : this(parcel.readString() ?: "", parcel.readInt()) {
+        toCount = parcel.readByte() != 0.toByte()
+    }
 
     var isIncluded = true
+    var toCount = true
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.apply {
             writeString(title)
             writeInt(duration)
+            dest.writeByte((if (toCount) 1 else 0).toByte())
         }
     }
 
     override fun describeContents(): Int {
         return 0
     }
-
 
     companion object {
         @JvmField

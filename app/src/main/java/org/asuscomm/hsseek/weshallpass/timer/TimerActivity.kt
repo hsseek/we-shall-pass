@@ -19,7 +19,7 @@ private const val TAG_FRAGMENT_ALARM = "org.asuscomm.hsseek.weshallpass.starter.
 private const val TAG_FRAGMENT_COUNT = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_COUNT"
 private const val TAG_FRAGMENT_CONTROL = "org.asuscomm.hsseek.weshallpass.starter.TAG_FRAGMENT_CONTROL"
 
-const val EXTRA_TIMEUP_BOOLEAN = "org.asuscomm.hsseek.weshallpass.starter.EXTRA_TIMEUP"
+const val EXTRA_TIME_UP_BOOLEAN = "org.asuscomm.hsseek.weshallpass.starter.EXTRA_TIMEUP"
 const val EXTRA_SUBJECTS_ARRAY_LIST = "org.asuscomm.hsseek.weshallpass.starter.PASS_SUBJECT_LIST"
 const val EXTRA_EXAM_TITLE_STRING = "org.asuscomm.hsseek.weshallpass.starter.EXAM_TITLE"
 const val EXTRA_TIMER_SECONDS_LEFT = "org.asuscomm.hsseek.weshallpass.starter.TIMER_SECONDS_LEFT"
@@ -36,15 +36,15 @@ class TimerActivity : AppCompatActivity(),
     private var mCountFragment: TimerCountFragment? = null
     private var mControlFragment: TimerControlFragment? = null
 
-    // The valid Subjects
-    private val mSubjects: ArrayList<Subject> = arrayListOf()
     // The exam title
     private var mExamTitle: String? = null
+    // The valid Subjects
+    private val mSubjects: ArrayList<Subject> = arrayListOf()
+    // The current Subject
+    private lateinit var mCurrentSubject: Subject
 
     // The countdown amount
     private var mCountDurationSeconds = 0
-    // The current subject index for countdown
-    private var mCurrentSubjectIndex = 0
 
     // Variables regarding Service
     private var mService: CountDownService? = null
@@ -84,26 +84,48 @@ class TimerActivity : AppCompatActivity(),
         // Populate the mSubjects list for countdown
         for (subject in validSubjects) mSubjects.add(subject)
 
-        if (intent.getBooleanExtra(EXTRA_CONTINUE_COUNTDOWN, false)) {
+        val isCounting = intent.getBooleanExtra(EXTRA_CONTINUE_COUNTDOWN, false)
+        // If it has been counting, bind to the Service and continue the countdown.
+        if (isCounting) {
             bindService(Intent(this, CountDownService::class.java), connection, Context.BIND_AUTO_CREATE)
             Log.d(TAG_LOG, "Bound to the service")
         }
 
         // Should the alarm go off?
-        val isTimeUp = intent.getBooleanExtra(EXTRA_TIMEUP_BOOLEAN, false)
+        val isTimeUp = intent.getBooleanExtra(EXTRA_TIME_UP_BOOLEAN, false)
 
         // Instantiate the Fragments
         if (savedInstanceState == null) {
             // TODO: Retrieve whether the option has been enabled from SharedPreferences
             mAlarmFragment = TimerAlarmFragment.newInstance(true)
 
-            val firstSubject = mSubjects[0]
-            mCountDurationSeconds = firstSubject.duration * 60
+            for (i in 0 until mSubjects.size) {
+                val subject = mSubjects[i]
+                if (subject.toCount) {
+                    // Get the first Subject to count
+                    mCurrentSubject = subject
+                    // No need to loop further
+                    break
+                }
+
+                if (i == mSubjects.size - 1) {
+                    Log.w(TAG_LOG, "No subject to count")
+                    mCurrentSubject = mSubjects[0]
+                }
+            }
+
+            mCountDurationSeconds = mCurrentSubject.duration * 60
 
             val initialDuration = if (isTimeUp) 0 else mCountDurationSeconds
-            mCountFragment = TimerCountFragment.newInstance(mExamTitle?:"", firstSubject.title, initialDuration)
+            mCountFragment = TimerCountFragment.newInstance(mExamTitle?:"", mCurrentSubject.title, initialDuration)
 
-            mControlFragment = TimerControlFragment.newInstance()
+            // Enable or disable the forwards / backwards buttons
+            val isFirstSubject = mCurrentSubject == mSubjects[0]
+            val isLastSubject = mCurrentSubject == mSubjects[mSubjects.size - 1]
+            mControlFragment = TimerControlFragment.newInstance(
+                backwardsEnabled = !isFirstSubject,
+                forwardsEnabled = !isLastSubject,
+                isCounting = isCounting)
         } else {
             mAlarmFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_ALARM) as? TimerAlarmFragment
             mCountFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_COUNT) as? TimerCountFragment
@@ -165,7 +187,8 @@ class TimerActivity : AppCompatActivity(),
 
     override fun onNewIntent(intent: Intent?) {
         Log.d(TAG_LOG, "onNewIntent called: mBound = $mBound")
-        if (intent?.extras?.getBoolean(EXTRA_TIMEUP_BOOLEAN) == true) {
+        if (!mBound) bindService(Intent(this, CountDownService::class.java), connection, Context.BIND_AUTO_CREATE)
+        if (intent?.extras?.getBoolean(EXTRA_TIME_UP_BOOLEAN) == true) {
             goOffAlarm()
         }
     }
@@ -201,6 +224,7 @@ class TimerActivity : AppCompatActivity(),
     }
 
     override fun onClickStop() {
+        // TODO: Hide the stop button and show the refresh button on time-ups
         mVibrator.cancel()
 
         if (mBound) {
@@ -211,38 +235,67 @@ class TimerActivity : AppCompatActivity(),
         // Stop the countdown and the Service
         stopService()
 
-        val subject = mSubjects[mCurrentSubjectIndex]
         // Reset the timer
-        mCountFragment?.updateSubject(subject.title, subject.duration * 60)
+        mCountFragment?.updateSubject(mCurrentSubject.title, mCurrentSubject.duration * 60)
     }
 
     override fun onClickForwards() {
         // TODO: The notification won't dismiss.
         stopService()
+        mVibrator.cancel()
 
-        mCurrentSubjectIndex += 1
-        val newSubjectDurationSeconds = mSubjects[mCurrentSubjectIndex].duration * 60
-        mCountFragment?.updateSubject(mSubjects[mCurrentSubjectIndex].title, newSubjectDurationSeconds)
+        // Done with the current Subject
+        mCurrentSubject.toCount = false
+
+        // Get the next Subject to count
+        for (i in 0 until mSubjects.size) {
+            val subject = mSubjects[i]
+            if (subject.toCount) {
+                // Get the first Subject to count
+                mCurrentSubject = subject
+                // No need to loop further
+                break
+            }
+
+            if (i == mSubjects.size - 1) Log.w(TAG_LOG, "No subject to count")
+        }
+
+        // If the Subject is the last Subject, disable the forward button
+        if (mCurrentSubject == mSubjects[mSubjects.size - 1]) mControlFragment?.setForwardsButtonEnabled(false)
+        // If the Subject is not the first Subject, enable the backward button
+        else if (mCurrentSubject != mSubjects[0]) mControlFragment?.setBackwardsButtonEnabled(true)
+
+        val newSubjectDurationSeconds = mCurrentSubject.duration * 60
+        mCountFragment?.updateSubject(mCurrentSubject.title, newSubjectDurationSeconds)
 
         // Update the CDT duration as well
         mCountDurationSeconds = newSubjectDurationSeconds
 
-        if (mCurrentSubjectIndex == mSubjects.size - 1) mControlFragment?.setForwardButtonEnabled(false)
-        else if (mCurrentSubjectIndex > 0) mControlFragment?.setBackwardButtonEnabled(true)
     }
 
     override fun onClickBackwards() {
         stopService()
+        mVibrator.cancel()
 
-        mCurrentSubjectIndex -= 1
-        val newSubjectDurationSeconds = mSubjects[mCurrentSubjectIndex].duration * 60
-        mCountFragment?.updateSubject(mSubjects[mCurrentSubjectIndex].title, newSubjectDurationSeconds)
+        // Get the last counted Subject
+        for (subject in mSubjects) {
+            if (!subject.toCount) {
+                mCurrentSubject = subject
+            } else break /* Will break on the first incidence of ... false true ... */
+        }
+
+        // Mark the Subject 'to count'
+        mCurrentSubject.toCount = true
+        // If the Subject is the last Subject, disable the backwards button
+        if (mCurrentSubject == mSubjects[0]) mControlFragment?.setBackwardsButtonEnabled(false)
+        // If the Subject is not the first Subject, enable the forwards button
+        else if (mCurrentSubject != mSubjects[mSubjects.size - 1]) mControlFragment?.setForwardsButtonEnabled(true)
+
+        val newSubjectDurationSeconds = mCurrentSubject.duration * 60
+        mCountFragment?.updateSubject(mCurrentSubject.title, newSubjectDurationSeconds)
 
         // Update the CDT duration as well
         mCountDurationSeconds = newSubjectDurationSeconds
-
-        if (mCurrentSubjectIndex == 0) mControlFragment?.setBackwardButtonEnabled(false)
-        else if (mCurrentSubjectIndex < mSubjects.size - 1) mControlFragment?.setForwardButtonEnabled(true)
     }
 
     private fun stopService() {

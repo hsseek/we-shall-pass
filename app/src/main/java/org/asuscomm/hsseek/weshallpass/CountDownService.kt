@@ -137,8 +137,7 @@ class CountDownService : Service() {
 
     private fun Intent.putExtras(isTimeUp: Boolean): Intent {
         return this.apply {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            putExtra(EXTRA_TIMEUP_BOOLEAN, isTimeUp)
+            putExtra(EXTRA_TIME_UP_BOOLEAN, isTimeUp)
             putExtra(EXTRA_EXAM_TITLE_STRING, mExamTitle)
             putParcelableArrayListExtra(EXTRA_SUBJECTS_ARRAY_LIST, mSubjects)
         }
