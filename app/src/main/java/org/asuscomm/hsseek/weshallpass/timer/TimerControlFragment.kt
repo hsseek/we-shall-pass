@@ -16,12 +16,14 @@ private const val TAG_LOG = "TimerControlFragment"
 private const val ARG_BACKWARDS_ENABLED = "ARG_BACKWARDS_ENABLED"
 private const val ARG_FORWARDS_ENABLED = "ARG_FORWARDS_ENABLED"
 private const val ARG_IS_COUNTING = "ARG_IS_COUNTING"
+private const val ARG_IS_TIME_UP = "ARG_IS_TIME_UP"
 
 class TimerControlFragment : Fragment() {
     private var mListener: OnControlInteractionListener? = null
     private var mBackwardsEnabled = true
     private var mForwardsEnabled = true
     private var mIsCounting = false
+    private var mRefreshable = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +31,7 @@ class TimerControlFragment : Fragment() {
             mBackwardsEnabled = it.getBoolean(ARG_BACKWARDS_ENABLED)
             mForwardsEnabled = it.getBoolean(ARG_FORWARDS_ENABLED)
             mIsCounting = it.getBoolean(ARG_IS_COUNTING)
+            mRefreshable = it.getBoolean(ARG_IS_TIME_UP)
         }
     }
 
@@ -36,50 +39,81 @@ class TimerControlFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+        // Inflate the layout for this fragment.
         val view = inflater.inflate(R.layout.fragment_timer_control, container, false)
 
         with(view.button_control_start) {
+            // If the countdown has been running, replace the icon.
+            if (mIsCounting) this.setImageResource(R.drawable.ic_pause_circle)
+
+            // Set the listener to assign actions on clicking the start button.
             setOnClickListener {
+                // Let the Context know the start button has been clicked.
                 mListener?.onClickStart()
+
+                // Replace the icon to pause icon.
                 enableStartButton(false)
             }
-
-            if (mIsCounting) this.setImageResource(R.drawable.ic_pause_circle)
         }
 
-        view.button_control_stop.setOnClickListener {
-            mListener?.onClickStop()
-            enableStartButton(true)
+        with(view.button_control_stop) {
+            // If the time is up, show the refresh icon.
+            if (mRefreshable) this.setImageResource(R.drawable.ic_refresh)
+
+            setOnClickListener {
+                // Let the Context know the stop button has been clicked.
+                mListener?.onClickStop()
+
+                // Enable the start button.
+                enableStartButton(true)
+
+                // Consume the refreshable-ness on clicking if it was refreshable
+                if (mRefreshable) {
+                    setImageResource(R.drawable.ic_stop)
+                    mRefreshable = !mRefreshable
+                }
+            }
         }
 
         with(view.button_control_forwards) {
+            // Enable or disable the button (on the last subject or not)
+            this.setButtonEnabled(mForwardsEnabled)
+
             setOnClickListener {
                 mListener?.onClickForwards()
                 enableStartButton(true)
             }
-
-            this.setButtonEnabled(mForwardsEnabled)
         }
 
         with(view.button_control_backwards) {
+            // Enable or disable the button (on the first subject or not)
+            this.setButtonEnabled(mBackwardsEnabled)
+
             setOnClickListener {
                 mListener?.onClickBackwards()
                 enableStartButton(true)
             }
-
-            this.setButtonEnabled(mBackwardsEnabled)
         }
 
         return view
     }
 
     private fun enableStartButton(enable: Boolean) {
-        val button = view?.button_control_start
+        view?.button_control_start?.let {
+            it.isClickable = enable
+            if (enable) it.setImageResource(R.drawable.ic_play_circle) else {
+                it.setImageResource(R.drawable.ic_pause_circle)
+            }
+        }
+    }
 
-        button?.isClickable = enable
-        if (enable) button?.setImageResource(R.drawable.ic_play_circle) else {
-            button?.setImageResource(R.drawable.ic_pause_circle)
+    fun enableRefreshButton(enable: Boolean) {
+        mRefreshable = enable
+
+        view?.button_control_stop?.let {
+            if (enable) it.setImageResource(R.drawable.ic_refresh) else {
+                it.setImageResource(R.drawable.ic_stop)
+            }
         }
     }
 
@@ -124,12 +158,13 @@ class TimerControlFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(backwardsEnabled: Boolean, forwardsEnabled: Boolean, isCounting: Boolean) =
+        fun newInstance(backwardsEnabled: Boolean, forwardsEnabled: Boolean, isCounting: Boolean, isTimeUp: Boolean) =
             TimerControlFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean(ARG_BACKWARDS_ENABLED, backwardsEnabled)
                     putBoolean(ARG_FORWARDS_ENABLED, forwardsEnabled)
                     putBoolean(ARG_IS_COUNTING, isCounting)
+                    putBoolean(ARG_IS_TIME_UP, isTimeUp)
                 }
             }
     }

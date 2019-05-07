@@ -92,6 +92,7 @@ class TimerActivity : AppCompatActivity(),
         }
 
         // Should the alarm go off?
+        // TODO: If the time is up, don't bind to the service (stop the Service and go off the alarm)
         val isTimeUp = intent.getBooleanExtra(EXTRA_TIME_UP_BOOLEAN, false)
 
         // Instantiate the Fragments
@@ -125,7 +126,8 @@ class TimerActivity : AppCompatActivity(),
             mControlFragment = TimerControlFragment.newInstance(
                 backwardsEnabled = !isFirstSubject,
                 forwardsEnabled = !isLastSubject,
-                isCounting = isCounting)
+                isCounting = isCounting,
+                isTimeUp = isTimeUp)
         } else {
             mAlarmFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_ALARM) as? TimerAlarmFragment
             mCountFragment = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_COUNT) as? TimerCountFragment
@@ -203,6 +205,7 @@ class TimerActivity : AppCompatActivity(),
         }
 
         mCountFragment?.setCount(0)
+        mControlFragment?.enableRefreshButton(true)
     }
 
     // Interface for TimerAlarmFragment

@@ -75,7 +75,7 @@ class CountDownService : Service() {
 
     private fun startCountDown(durationSeconds: Int) {
         val pendingIntent: PendingIntent =
-            Intent(this, TimerActivity::class.java).putExtras(false).let { notificationIntent ->
+            Intent(this, TimerActivity::class.java).putExtras(/* TODO: Change isTimeUp to false after test */true).let { notificationIntent ->
                 // Along with the extras, put a marker that the Activity was launched from the PendingIntent
                 // (so that it continues the countdown on launching)
                 notificationIntent.putExtra(EXTRA_CONTINUE_COUNTDOWN, true)

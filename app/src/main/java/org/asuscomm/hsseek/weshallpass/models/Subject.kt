@@ -3,6 +3,9 @@ package org.asuscomm.hsseek.weshallpass.models
 import android.os.Parcel
 import android.os.Parcelable
 
+/**
+ * @param duration The duration of the subject in minute
+*/
 class Subject(val title: String, val duration: Int) : Parcelable {
 
     constructor(parcel: Parcel) : this(parcel.readString() ?: "", parcel.readInt()) {
